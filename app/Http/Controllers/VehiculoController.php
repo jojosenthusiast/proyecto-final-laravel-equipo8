@@ -30,6 +30,13 @@ class VehiculoController extends Controller
     // Laravel busca el registro por su llave y responde 404 si no existe.
     public function show(Vehiculo $vehiculo)
     {
+        // Las órdenes se cargan de la más reciente a la más antigua y con su tipo
+        // de servicio en la misma tanda, para no consultar una vez por cada fila.
+        $vehiculo->load([
+            'ordenes' => fn ($consulta) => $consulta->orderByDesc('fecha_ingreso'),
+            'ordenes.tipoServicio',
+        ]);
+
         return view('vehiculos.show', compact('vehiculo'));
     }
 }
