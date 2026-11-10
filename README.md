@@ -156,3 +156,193 @@ La segunda orden debe listar únicamente `vehiculos.index` (`GET /vehiculos`). D
 
 - `http://127.0.0.1:8000/vehiculos` muestra 10 vehículos y la página 2 muestra los otros 10.
 - `http://127.0.0.1:8000/vehiculos?marca=Toyota` muestra solo esa marca. Las marcas se reparten al azar, así que conviene elegir una que aparezca en el filtro.
+
+
+## Órdenes y resumen del taller
+
+### 1. Órdenes de servicio
+
+El sistema Biela permite consultar las órdenes de servicio
+asociadas a los vehículos registrados en el taller.
+
+Cada orden contiene:
+
+- Vehículo asociado.
+- Tipo de servicio realizado.
+- Fecha de ingreso.
+- Fecha de entrega, cuando corresponde.
+- Kilometraje al momento del ingreso.
+- Descripción del trabajo.
+- Costo total.
+- Estado de la orden.
+
+Las órdenes se relacionan con los vehículos y los tipos
+de servicio mediante los modelos Eloquent de Laravel.
+
+### 2. Estados de las órdenes
+
+Las órdenes pueden presentar tres estados:
+
+**Pendiente:** el servicio está registrado, pero todavía
+no ha comenzado.
+
+**En proceso:** el vehículo se encuentra recibiendo
+el servicio correspondiente.
+
+**Finalizada:** el servicio se ha completado y la orden
+tiene registrada una fecha de entrega.
+
+En los datos de prueba, las órdenes pendientes y en proceso
+no tienen fecha de entrega.
+
+Las órdenes finalizadas tienen una fecha de entrega igual
+o posterior a la fecha de ingreso.
+
+### 3. Generación de órdenes de prueba
+
+El archivo OrdenServicioFactory.php genera los datos
+iniciales de cada orden.
+
+El archivo OrdenServicioSeeder.php utiliza esa Factory
+para registrar órdenes de servicio asociadas a vehículos
+y tipos de servicio existentes.
+
+El proceso funciona de la siguiente manera:
+
+1. Se consultan los tipos de servicio registrados.
+2. Se seleccionan los primeros 12 vehículos.
+3. Se generan entre 1 y 3 órdenes para cada vehículo.
+4. Los estados se distribuyen entre pendiente,
+   en_proceso y finalizada.
+5. El kilometraje aumenta progresivamente para cada
+   vehículo conforme avanzan las fechas.
+6. Las órdenes finalizadas reciben una fecha de entrega
+   posterior a su ingreso.
+
+Los ocho vehículos restantes quedan sin órdenes de
+servicio para comprobar posteriormente el historial vacío.
+
+La cantidad de órdenes generadas puede variar entre
+12 y 36 registros.
+
+### 4. Panel de resumen
+
+La página principal del sistema se encuentra en la ruta:
+
+GET /
+
+Esta ruta utiliza PanelController@index para consultar
+los datos de MySQL mediante Eloquent.
+
+El panel muestra cinco indicadores:
+
+- Vehículos registrados: cantidad total de vehículos.
+- Órdenes de servicio: cantidad total de órdenes.
+- Pendientes: órdenes con estado pendiente.
+- En proceso: órdenes con estado en_proceso.
+- Finalizadas: órdenes con estado finalizada.
+
+La suma de los tres estados debe coincidir con
+el total de órdenes de servicio.
+
+### 5. Servicios más solicitados
+
+El panel incluye una tabla que muestra todos los
+tipos de servicio y la cantidad de órdenes asociadas.
+
+La información se obtiene mediante la relación
+ordenes() del modelo TipoServicio.
+
+Se utiliza withCount('ordenes') para calcular
+los totales y ordenar los servicios de mayor a menor.
+
+### 6. Últimas órdenes
+
+El panel muestra las cinco órdenes de servicio
+más recientes.
+
+La tabla contiene:
+
+- Placa del vehículo.
+- Tipo de servicio.
+- Fecha de ingreso.
+- Estado de la orden.
+
+Las relaciones vehiculo y tipoServicio se cargan
+anticipadamente mediante with() para evitar
+consultas adicionales por cada registro.
+
+La placa permite acceder a la ficha del vehículo.
+Esta funcionalidad se completará en el módulo
+asignado a Fernando.
+
+### 7. Comprobación de los datos
+
+Para preparar una base de datos local de prueba
+desde cero, ejecutar:
+
+php artisan migrate:fresh --seed
+
+ADVERTENCIA: este comando elimina las tablas
+existentes y sus datos. No debe utilizarse en una
+base de datos con información que se necesite conservar.
+
+Para iniciar el servidor:
+
+php artisan serve
+
+Abrir en el navegador:
+
+http://127.0.0.1:8000
+
+Para comprobar los registros, ejecutar:
+
+php artisan tinker
+
+Dentro de Tinker, utilizar las siguientes consultas:
+
+Total de vehículos:
+
+\App\Models\Vehiculo::count();
+
+Total de órdenes:
+
+\App\Models\OrdenServicio::count();
+
+Órdenes pendientes:
+
+\App\Models\OrdenServicio::where('estado', 'pendiente')->count();
+
+Órdenes en proceso:
+
+\App\Models\OrdenServicio::where('estado', 'en_proceso')->count();
+
+Órdenes finalizadas:
+
+\App\Models\OrdenServicio::where('estado', 'finalizada')->count();
+
+Servicios más solicitados:
+
+\App\Models\TipoServicio::withCount('ordenes')->orderByDesc('ordenes_count')->get();
+
+Últimas cinco órdenes:
+
+\App\Models\OrdenServicio::with(['vehiculo', 'tipoServicio'])->orderByDesc('fecha_ingreso')->limit(5)->get();
+
+Los resultados deben coincidir con los indicadores
+y las tablas del panel principal.
+
+### 8. Archivos desarrollados
+
+Los archivos correspondientes a este módulo son:
+
+- database/factories/OrdenServicioFactory.php
+- database/seeders/OrdenServicioSeeder.php
+- app/Http/Controllers/PanelController.php
+- resources/views/panel/index.blade.php
+
+También se integraron el seeder de órdenes en
+DatabaseSeeder.php y la ruta principal en routes/web.php.
+
+Responsable del módulo: Leonel Munguia.
+
