@@ -5,6 +5,17 @@
 @section('contenido')
     <h1 class="titulo-pagina">Vehículos registrados</h1>
 
+    <form class="filtro" method="get" action="{{ url('/vehiculos') }}">
+        <label for="marca">Marca</label>
+        <select name="marca" id="marca">
+            <option value="">Todas</option>
+            @foreach ($marcas as $marca)
+                <option value="{{ $marca }}" @selected(request('marca') === $marca)>{{ $marca }}</option>
+            @endforeach
+        </select>
+        <button class="boton" type="submit">Filtrar</button>
+    </form>
+
     @if ($vehiculos->isEmpty())
         <p class="vacio">Todavía no hay vehículos registrados.</p>
     @else
