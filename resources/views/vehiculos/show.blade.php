@@ -7,29 +7,35 @@
         <span class="placa">{{ $vehiculo->placa }}</span>
     </h1>
 
-    <dl class="ficha-datos">
-        <dt>Marca</dt>
-        <dd>{{ $vehiculo->marca }}</dd>
+    <section class="ficha">
+        <div class="ficha-imagen">
+            <img src="{{ $vehiculo->imagen_url }}" alt="Foto de {{ $vehiculo->placa }}">
+        </div>
 
-        <dt>Modelo</dt>
-        <dd>{{ $vehiculo->modelo }}</dd>
+        <dl class="ficha-datos">
+            <dt>Marca</dt>
+            <dd>{{ $vehiculo->marca }}</dd>
 
-        <dt>Año</dt>
-        <dd>{{ $vehiculo->anio }}</dd>
+            <dt>Modelo</dt>
+            <dd>{{ $vehiculo->modelo }}</dd>
 
-        <dt>Color</dt>
-        <dd>{{ $vehiculo->color }}</dd>
+            <dt>Año</dt>
+            <dd>{{ $vehiculo->anio }}</dd>
 
-        <dt>Kilometraje</dt>
-        <dd>{{ number_format($vehiculo->kilometraje) }} km</dd>
+            <dt>Color</dt>
+            <dd>{{ $vehiculo->color }}</dd>
 
-        <dt>Propietario</dt>
-        <dd>{{ $vehiculo->propietario_nombre }}</dd>
+            <dt>Kilometraje</dt>
+            <dd>{{ number_format($vehiculo->kilometraje) }} km</dd>
 
-        <dt>Teléfono</dt>
-        <dd>{{ $vehiculo->propietario_telefono }}</dd>
+            <dt>Propietario</dt>
+            <dd>{{ $vehiculo->propietario_nombre }}</dd>
 
-        <dt>Fecha de registro</dt>
-        <dd>{{ $vehiculo->created_at->format('d/m/Y') }}</dd>
-    </dl>
+            <dt>Teléfono</dt>
+            <dd>{{ $vehiculo->propietario_telefono }}</dd>
+
+            <dt>Fecha de registro</dt>
+            <dd>{{ $vehiculo->created_at->format('d/m/Y') }}</dd>
+        </dl>
+    </section>
 @endsection
