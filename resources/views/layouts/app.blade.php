@@ -11,29 +11,19 @@
 </head>
 <body>
     <header>
-        <a class="marca" href="{{ url('/') }}">
+        <a class="marca" href="{{ route('inicio') }}">
             {{ config('app.name') }}
         </a>
 
-        <nav>
-            <a href="{{ url('/') }}">Resumen</a>
-            <a href="{{ url('/vehiculos') }}">Vehículos</a>
-            <a href="{{ url('/servicios') }}">Servicios</a>
-        </nav>
+        @include('partials.menu')
     </header>
 
-    @if (session('exito'))
-        <div class="alerta">
-            {{ session('exito') }}
-        </div>
-    @endif
+    @include('partials.alertas')
 
     <main class="contenedor">
         @yield('contenido')
     </main>
 
-    <footer>
-        {{ config('app.name') }} · Caso 8, Taller mecánico · UNICAES
-    </footer>
+    @include('partials.pie')
 </body>
 </html>

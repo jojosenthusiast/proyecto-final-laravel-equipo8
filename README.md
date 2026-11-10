@@ -377,3 +377,34 @@ La segunda orden debe listar `vehiculos.index` (`GET /vehiculos`) y `vehiculos.s
 - `http://127.0.0.1:8000/vehiculos/9999` responde con la página 404.
 - Desde `/vehiculos`, el botón **Ver ficha** lleva a la ficha y el enlace **Volver al listado** regresa al listado.
 
+## Interfaz
+
+*Sección de Milton (bloque 6).*
+
+El layout `resources/views/layouts/app.blade.php` reúne el menú, las alertas y el pie mediante los partials de `resources/views/partials/`. El menú usa rutas nombradas y marca la sección activa, incluida **Vehículos** al abrir una ficha. Las alertas leen los mensajes de sesión `exito` y `error`. El nombre del taller proviene de `config('app.name')`.
+
+La interfaz usa una base de papel cálido, tinta oscura y un acento óxido. Los colores se centralizan en `:root` de `public/css/estilos.css`.
+
+| Uso | Variables |
+| --- | --- |
+| Fondo y superficies | `--biela-fondo`, `--biela-superficie` |
+| Texto principal y secundario | `--biela-tinta`, `--biela-suave` |
+| Bordes y acento | `--biela-linea`, `--biela-acento` |
+| Pendiente | `--estado-pendiente`, `--estado-pendiente-fondo` |
+| En proceso | `--estado-proceso`, `--estado-proceso-fondo` |
+| Finalizada | `--estado-final`, `--estado-final-fondo` |
+
+Los títulos usan Georgia (`--fuente-titulo`), el resto de la interfaz usa la tipografía del sistema (`--fuente-texto`) y las placas usan una fuente monoespaciada (`--fuente-placa`). Los bordes son finos y las esquinas usan `--radio`. La interfaz usa CSS propio y fuentes locales, sin degradados, sombras, estilos en línea, CDN, Vite ni npm. Cada etiqueta de estado conserva su texto en español.
+
+| Elemento | Clases |
+| --- | --- |
+| Estructura y título | `contenedor`, `titulo-pagina`, `marca` |
+| Tablas y listado | `tabla`, `miniatura`, `placa`, `filtro` |
+| Acciones, alertas y mensajes vacíos | `boton`, `alerta`, `alerta-exito`, `alerta-error`, `vacio` |
+| Ficha | `ficha`, `ficha-imagen`, `ficha-datos` |
+| Estados | `etiqueta`, `etiqueta-pendiente`, `etiqueta-en-proceso`, `etiqueta-finalizada` |
+| Panel | `indicadores`, `indicador`, `indicador-valor`, `indicador-nombre` |
+| Paginación | `pagination`, `page-item`, `page-link`, `active`, `disabled` |
+
+A 700 px o menos, el menú y los indicadores se apilan, la imagen queda encima de los datos de la ficha y cada tabla permite desplazarse horizontalmente dentro de su propio borde. Para comprobar la interfaz, ejecuta `php artisan view:clear` y abre `/`, `/vehiculos`, `/vehiculos/1` y `/servicios` a 375 px y en escritorio.
+
