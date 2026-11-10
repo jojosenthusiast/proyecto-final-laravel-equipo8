@@ -1,0 +1,23 @@
+:root {
+    --biela-fondo: #F4F1EA;
+    --biela-superficie: #FFFFFF;
+    --biela-tinta: #1E2326;
+    --biela-suave: #5B6368;
+    --biela-linea: #D9D4C7;
+    --biela-acento: #C2491D;
+
+    --estado-pendiente: #8A5A00;
+    --estado-pendiente-fondo: #FBEFD0;
+
+    --estado-proceso: #1F5F8B;
+    --estado-proceso-fondo: #DCEBF6;
+
+    --estado-final: #2B6B3A;
+    --estado-final-fondo: #DDEFDF;
+
+    --fuente-titulo: Georgia, "Times New Roman", serif;
+    --fuente-texto: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    --fuente-placa: ui-monospace, Consolas, "Courier New", monospace;
+
+    --radio: 4px;
+}
