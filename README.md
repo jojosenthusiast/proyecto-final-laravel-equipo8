@@ -7,12 +7,12 @@ Caso 8, Taller mecánico. Equipo 8.
 
 | Integrante | Usuario de GitHub |
 | --- | --- |
-| Carlos | por confirmar |
-| Ángel | por confirmar |
-| Jorge | por confirmar |
-| Leonel | por confirmar |
-| Fernando | por confirmar |
-| Milton | por confirmar |
+| Carlos | [@jojosenthusiast](https://github.com/jojosenthusiast) |
+| Ángel | [@angelcoto-stack](https://github.com/angelcoto-stack) |
+| Jorge | [@JorgeRamos2001](https://github.com/JorgeRamos2001) |
+| Leonel | [@leonelgit](https://github.com/leonelgit) |
+| Fernando | [@fernandovalle45](https://github.com/fernandovalle45) |
+| Milton | [@Milton84-toc](https://github.com/Milton84-toc) |
 
 ## 1. Descripción
 
