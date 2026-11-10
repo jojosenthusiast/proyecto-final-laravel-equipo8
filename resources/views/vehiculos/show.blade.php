@@ -48,6 +48,8 @@
                 <th>Servicio</th>
                 <th>Kilometraje</th>
                 <th>Descripción</th>
+                <th>Estado</th>
+                <th>Entrega</th>
                 <th>Costo</th>
             </tr>
         </thead>
@@ -62,6 +64,20 @@
                     <td>{{ number_format($orden->kilometraje_ingreso) }} km</td>
 
                     <td>{{ $orden->descripcion }}</td>
+
+                    <td>
+                        <span class="etiqueta etiqueta-{{ str_replace('_', '-', $orden->estado) }}">
+                            {{ ucfirst(str_replace('_', ' ', $orden->estado)) }}
+                        </span>
+                    </td>
+
+                    <td>
+                        @if ($orden->fecha_entrega)
+                            {{ $orden->fecha_entrega->format('d/m/Y') }}
+                        @else
+                            Sin entregar
+                        @endif
+                    </td>
 
                     <td>${{ number_format($orden->costo_total, 2) }}</td>
                 </tr>
