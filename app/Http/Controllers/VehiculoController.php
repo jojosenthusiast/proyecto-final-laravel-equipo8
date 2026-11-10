@@ -25,4 +25,11 @@ class VehiculoController extends Controller
             'marcas' => Vehiculo::select('marca')->distinct()->orderBy('marca')->pluck('marca'),
         ]);
     }
+
+    // [CRUD-READ] Ficha del vehículo. El parámetro Vehiculo es route model binding:
+    // Laravel busca el registro por su llave y responde 404 si no existe.
+    public function show(Vehiculo $vehiculo)
+    {
+        return view('vehiculos.show', compact('vehiculo'));
+    }
 }

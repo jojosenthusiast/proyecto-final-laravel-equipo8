@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PanelController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\VehiculoController;
-use App\Http\Controllers\PanelController;
+use Illuminate\Support\Facades\Route;
 
-// Listado de vehículos; Fernando agrega 'show' y en Fase 2 se quita el only().
-Route::resource('vehiculos', VehiculoController::class)->only(['index']);
+// Listado y ficha de vehículos; en Fase 2 se quita el only() para el CRUD completo.
+Route::resource('vehiculos', VehiculoController::class)->only(['index', 'show']);
 
 // Catálogo de servicios del taller.
 Route::get('/servicios', [TipoServicioController::class, 'index'])
