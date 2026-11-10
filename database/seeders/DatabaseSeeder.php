@@ -13,8 +13,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TipoServicioSeeder::class,
 
-            // Jorge habilitará este seeder cuando esté listo.
-            // VehiculoSeeder::class,
+            VehiculoSeeder::class,
 
             // Leonel habilitará este seeder cuando esté listo.
             // OrdenServicioSeeder::class,

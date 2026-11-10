@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\VehiculoFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vehiculo extends Model
 {
+    /** @use HasFactory<VehiculoFactory> */
+    use HasFactory;
+
     // Laravel buscaría "vehiculos" igual, pero se declara para que el contrato sea explícito.
     protected $table = 'vehiculos';
 
