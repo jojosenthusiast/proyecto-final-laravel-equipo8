@@ -60,6 +60,33 @@
 
     </div>
 
+    {{-- Servicios más solicitados --}}
+    <h2>Servicios más solicitados</h2>
+
+    @if ($tiposServicio->isEmpty())
+        <p class="vacio">
+            El catálogo de servicios está vacío.
+        </p>
+    @else
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th>Servicio</th>
+                    <th>Órdenes</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach ($tiposServicio as $tipo)
+                    <tr>
+                        <td>{{ $tipo->nombre }}</td>
+                        <td>{{ $tipo->ordenes_count }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
     <a class="boton" href="{{ url('/vehiculos') }}">
         Ver vehículos
     </a>
