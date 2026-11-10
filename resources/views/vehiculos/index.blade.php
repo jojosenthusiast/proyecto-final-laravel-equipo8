@@ -29,6 +29,7 @@
                     <th>Kilometraje</th>
                     <th>Propietario</th>
                     <th>Órdenes</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
 
@@ -53,6 +54,10 @@
                         </td>
 
                         <td>{{ $vehiculo->ordenes_count }}</td>
+
+                        <td>
+                            <a class="boton" href="{{ route('vehiculos.show', $vehiculo) }}">Ver ficha</a>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
