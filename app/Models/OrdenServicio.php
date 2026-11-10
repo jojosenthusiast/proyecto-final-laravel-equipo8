@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrdenServicio extends Model
 {
@@ -33,5 +34,17 @@ class OrdenServicio extends Model
             'kilometraje_ingreso' => 'integer',
             'costo_total' => 'decimal:2',
         ];
+    }
+
+    // [RELACION] Cada orden pertenece a un vehículo.
+    public function vehiculo(): BelongsTo
+    {
+        return $this->belongsTo(Vehiculo::class);
+    }
+
+    // [RELACION] Cada orden pertenece a un tipo de servicio.
+    public function tipoServicio(): BelongsTo
+    {
+        return $this->belongsTo(TipoServicio::class);
     }
 }

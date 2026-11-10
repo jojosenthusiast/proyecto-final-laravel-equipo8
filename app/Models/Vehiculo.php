@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vehiculo extends Model
 {
@@ -29,5 +30,11 @@ class Vehiculo extends Model
             'anio' => 'integer',
             'kilometraje' => 'integer',
         ];
+    }
+
+    // [RELACION] Un vehículo tiene muchas órdenes de servicio.
+    public function ordenes(): HasMany
+    {
+        return $this->hasMany(OrdenServicio::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TipoServicio extends Model
 {
@@ -22,5 +23,11 @@ class TipoServicio extends Model
         return [
             'precio_base' => 'decimal:2',
         ];
+    }
+
+    // [RELACION] Un tipo de servicio tiene muchas órdenes de servicio.
+    public function ordenes(): HasMany
+    {
+        return $this->hasMany(OrdenServicio::class);
     }
 }
