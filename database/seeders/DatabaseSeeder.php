@@ -15,8 +15,7 @@ class DatabaseSeeder extends Seeder
 
             VehiculoSeeder::class,
 
-            // Leonel habilitará este seeder cuando esté listo.
-            // OrdenServicioSeeder::class,
+            OrdenServicioSeeder::class,
         ]);
     }
 }
