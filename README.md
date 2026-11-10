@@ -408,3 +408,50 @@ Los títulos usan Georgia (`--fuente-titulo`), el resto de la interfaz usa la ti
 
 A 700 px o menos, el menú y los indicadores se apilan, la imagen queda encima de los datos de la ficha y cada tabla permite desplazarse horizontalmente dentro de su propio borde. Para comprobar la interfaz, ejecuta `php artisan view:clear` y abre `/`, `/vehiculos`, `/vehiculos/1` y `/servicios` a 375 px y en escritorio.
 
+
+## Evidencias de conceptos de programación
+
+Durante la Fase 1 del sistema Biela se implementaron
+y documentaron los siguientes conceptos:
+
+### Migraciones [MIGRACION]
+
+Las tablas tipos_servicio, vehiculos y ordenes_servicio
+se crean mediante migraciones de Laravel.
+
+Las migraciones permiten mantener una estructura
+de base de datos reproducible.
+
+### Relaciones [RELACION]
+
+Los modelos utilizan relaciones Eloquent:
+
+- Vehiculo tiene muchas órdenes de servicio.
+- TipoServicio tiene muchas órdenes de servicio.
+- OrdenServicio pertenece a un vehículo.
+- OrdenServicio pertenece a un tipo de servicio.
+
+Las llaves foráneas mantienen la integridad
+de los datos relacionados.
+
+### Encapsulamiento [ENCAPSULAMIENTO]
+
+Los modelos utilizan fillable para controlar
+las columnas que pueden asignarse masivamente.
+
+También utilizan casts para transformar fechas,
+cantidades y valores monetarios.
+
+El modelo Vehiculo incorpora un accesor para
+obtener la imagen del vehículo.
+
+### Lectura de datos [CRUD-READ]
+
+Los controladores utilizan Eloquent para consultar
+los registros de la base de datos.
+
+- VehiculoController: consulta los vehículos.
+- TipoServicioController: consulta los servicios.
+- PanelController: obtiene indicadores y órdenes.
+
+Las consultas se realizan sin concatenar SQL manualmente.
