@@ -87,6 +87,66 @@
         </table>
     @endif
 
+
+    {{-- Últimas órdenes registradas en el taller --}}
+    <h2>Últimas órdenes</h2>
+
+    @if ($ultimasOrdenes->isEmpty())
+        <p class="vacio">
+            Todavía no hay órdenes de servicio registradas.
+        </p>
+    @else
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th>Placa</th>
+                    <th>Servicio</th>
+                    <th>Ingreso</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach ($ultimasOrdenes as $orden)
+                    <tr>
+                        <td>
+                            <a href="{{ url('/vehiculos/' . $orden->vehiculo_id) }}">
+                                <span class="placa">
+                                    {{ $orden->vehiculo->placa }}
+                                </span>
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ $orden->tipoServicio->nombre }}
+                        </td>
+
+                        <td>
+                            {{ $orden->fecha_ingreso->format('d/m/Y') }}
+                        </td>
+
+                        <td>
+                            @if ($orden->estado === 'pendiente')
+                                <span class="etiqueta etiqueta-pendiente">
+                                    Pendiente
+                                </span>
+                            @elseif ($orden->estado === 'en_proceso')
+                                <span class="etiqueta etiqueta-en-proceso">
+                                    En proceso
+                                </span>
+                            @else
+                                <span class="etiqueta etiqueta-finalizada">
+                                    Finalizada
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+
     <a class="boton" href="{{ url('/vehiculos') }}">
         Ver vehículos
     </a>
