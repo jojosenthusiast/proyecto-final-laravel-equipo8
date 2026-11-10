@@ -346,3 +346,34 @@ DatabaseSeeder.php y la ruta principal en routes/web.php.
 
 Responsable del módulo: Leonel Munguia.
 
+## Ficha del vehículo
+
+*Sección de Fernando (bloque 5).*
+
+La ficha se abre desde el botón **Ver ficha** del listado o directamente en `/vehiculos/{id}`. Muestra la placa del vehículo, su imagen (la foto subida o la imagen por defecto de Biela), sus datos —marca, modelo, año, color, kilometraje, propietario, teléfono y fecha de registro—, la cantidad de órdenes, el total facturado y el historial de servicio.
+
+El historial lista las órdenes de la más reciente a la más antigua con la fecha de ingreso, el tipo de servicio, el kilometraje de ingreso, la descripción, el estado, la fecha de entrega (o el texto **Sin entregar** cuando falta) y el costo. El total facturado suma únicamente las órdenes finalizadas. Si el vehículo no tiene órdenes aparece "Este vehículo no ha tenido órdenes de servicio." y un botón **Volver al listado**.
+
+### Eager loading
+
+`VehiculoController@show` carga las órdenes y su tipo de servicio con `load(['ordenes' => ..., 'ordenes.tipoServicio'])` antes de entregar la vista. Así la ficha no hace una consulta por cada orden y las relaciones quedan disponibles en la vista sin consultas adicionales.
+
+### Route model binding
+
+El método recibe `show(Vehiculo $vehiculo)`. Laravel busca el vehículo por su llave en la ruta y responde 404 si no existe; no se usa `Vehiculo::find()`.
+
+### Cómo comprobarlo
+
+```bash
+php artisan migrate:fresh --seed
+php artisan route:list --name=vehiculos
+php artisan serve
+```
+
+La segunda orden debe listar `vehiculos.index` (`GET /vehiculos`) y `vehiculos.show` (`GET /vehiculos/{vehiculo}`). Después:
+
+- `http://127.0.0.1:8000/vehiculos/1` muestra los datos, la imagen por defecto, el resumen y las órdenes de la más reciente a la más antigua, con su tipo de servicio y su estado.
+- `http://127.0.0.1:8000/vehiculos/20` muestra el mensaje de que no tiene órdenes (los vehículos del 13 al 20 no tienen).
+- `http://127.0.0.1:8000/vehiculos/9999` responde con la página 404.
+- Desde `/vehiculos`, el botón **Ver ficha** lleva a la ficha y el enlace **Volver al listado** regresa al listado.
+
