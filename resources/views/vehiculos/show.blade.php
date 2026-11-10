@@ -38,4 +38,34 @@
             <dd>{{ $vehiculo->created_at->format('d/m/Y') }}</dd>
         </dl>
     </section>
+
+    <h2>Historial de servicio</h2>
+
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>Ingreso</th>
+                <th>Servicio</th>
+                <th>Kilometraje</th>
+                <th>Descripción</th>
+                <th>Costo</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach ($vehiculo->ordenes as $orden)
+                <tr>
+                    <td>{{ $orden->fecha_ingreso->format('d/m/Y') }}</td>
+
+                    <td>{{ $orden->tipoServicio->nombre }}</td>
+
+                    <td>{{ number_format($orden->kilometraje_ingreso) }} km</td>
+
+                    <td>{{ $orden->descripcion }}</td>
+
+                    <td>${{ number_format($orden->costo_total, 2) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 @endsection
