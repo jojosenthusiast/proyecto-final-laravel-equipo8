@@ -39,6 +39,12 @@
         </dl>
     </section>
 
+    <p>Órdenes de servicio: <strong>{{ $vehiculo->ordenes->count() }}</strong></p>
+    <p>
+        Total facturado:
+        <strong>${{ number_format($vehiculo->ordenes->where('estado', 'finalizada')->sum('costo_total'), 2) }}</strong>
+    </p>
+
     <h2>Historial de servicio</h2>
 
     <table class="tabla">
