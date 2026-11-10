@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260">
+  <rect width="400" height="260" fill="#E7E2D6"/>
+  <path d="M60 170h280v-28a10 10 0 0 0-10-10h-30l-30-40h-100l-30 40h-50a10 10 0 0 0-10 10z" fill="none" stroke="#5B6368" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="125" cy="176" r="18" fill="#E7E2D6" stroke="#5B6368" stroke-width="6"/>
+  <circle cx="275" cy="176" r="18" fill="#E7E2D6" stroke="#5B6368" stroke-width="6"/>
+  <text x="200" y="232" font-family="Georgia, serif" font-size="18" text-anchor="middle" fill="#5B6368">Sin foto registrada</text>
+</svg>
