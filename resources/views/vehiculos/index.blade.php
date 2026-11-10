@@ -14,6 +14,7 @@
                 <th>Año</th>
                 <th>Kilometraje</th>
                 <th>Propietario</th>
+                <th>Órdenes</th>
             </tr>
         </thead>
 
@@ -36,6 +37,8 @@
                         {{ $vehiculo->propietario_nombre }}<br>
                         {{ $vehiculo->propietario_telefono }}
                     </td>
+
+                    <td>{{ $vehiculo->ordenes_count }}</td>
                 </tr>
             @endforeach
         </tbody>
