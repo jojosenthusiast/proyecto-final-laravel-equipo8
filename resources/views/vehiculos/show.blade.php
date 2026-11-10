@@ -47,47 +47,53 @@
 
     <h2>Historial de servicio</h2>
 
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th>Ingreso</th>
-                <th>Servicio</th>
-                <th>Kilometraje</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th>Entrega</th>
-                <th>Costo</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach ($vehiculo->ordenes as $orden)
+    @if ($vehiculo->ordenes->isEmpty())
+        <p class="vacio">Este vehículo no ha tenido órdenes de servicio.</p>
+    @else
+        <table class="tabla">
+            <thead>
                 <tr>
-                    <td>{{ $orden->fecha_ingreso->format('d/m/Y') }}</td>
-
-                    <td>{{ $orden->tipoServicio->nombre }}</td>
-
-                    <td>{{ number_format($orden->kilometraje_ingreso) }} km</td>
-
-                    <td>{{ $orden->descripcion }}</td>
-
-                    <td>
-                        <span class="etiqueta etiqueta-{{ str_replace('_', '-', $orden->estado) }}">
-                            {{ ucfirst(str_replace('_', ' ', $orden->estado)) }}
-                        </span>
-                    </td>
-
-                    <td>
-                        @if ($orden->fecha_entrega)
-                            {{ $orden->fecha_entrega->format('d/m/Y') }}
-                        @else
-                            Sin entregar
-                        @endif
-                    </td>
-
-                    <td>${{ number_format($orden->costo_total, 2) }}</td>
+                    <th>Ingreso</th>
+                    <th>Servicio</th>
+                    <th>Kilometraje</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Entrega</th>
+                    <th>Costo</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+
+            <tbody>
+                @foreach ($vehiculo->ordenes as $orden)
+                    <tr>
+                        <td>{{ $orden->fecha_ingreso->format('d/m/Y') }}</td>
+
+                        <td>{{ $orden->tipoServicio->nombre }}</td>
+
+                        <td>{{ number_format($orden->kilometraje_ingreso) }} km</td>
+
+                        <td>{{ $orden->descripcion }}</td>
+
+                        <td>
+                            <span class="etiqueta etiqueta-{{ str_replace('_', '-', $orden->estado) }}">
+                                {{ ucfirst(str_replace('_', ' ', $orden->estado)) }}
+                            </span>
+                        </td>
+
+                        <td>
+                            @if ($orden->fecha_entrega)
+                                {{ $orden->fecha_entrega->format('d/m/Y') }}
+                            @else
+                                Sin entregar
+                            @endif
+                        </td>
+
+                        <td>${{ number_format($orden->costo_total, 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    <a class="boton" href="{{ route('vehiculos.index') }}">Volver al listado</a>
 @endsection
