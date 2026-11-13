@@ -504,6 +504,16 @@ El valor por defecto 0 mantiene válidas las órdenes y los seeders que ya exist
 
 Todas las órdenes cumplen `costo_total = precio_base + costo_adicional` y la fecha de entrega nunca es anterior a la de ingreso. Se comprueba con `php artisan test --filter=EscenariosDefensaTest`.
 
+#### Página del reporte (`/reportes`)
+
+| Consulta | Cómo se calcula |
+| --- | --- |
+| Órdenes pendientes | `OrdenServicio::pendientes()->with(['vehiculo', 'tipoServicio'])`, de la más antigua a la más reciente. Los días en el taller se calculan en el controlador con Carbon. |
+| Ingresos por tipo de servicio | `withCount` y `withSum` sobre las órdenes finalizadas de cada tipo; la base de datos hace la suma. |
+| Total general | `OrdenServicio::estado('finalizada')->sum('costo_total')`. |
+
+Solo las órdenes finalizadas cuentan como ingreso. Las relaciones se cargan con `with()`, así la página no hace una consulta por fila. Se comprueba con `php artisan test --filter=ReporteTest`.
+
 
 
 
