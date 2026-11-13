@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    // RefreshDatabase ejecuta las migraciones en la base SQLite en memoria de phpunit.xml.
+    use RefreshDatabase;
+
     /**
      * A basic test example.
      */
