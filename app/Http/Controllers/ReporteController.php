@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\HistorialVehiculoRequest;
 use App\Models\OrdenServicio;
 use App\Models\TipoServicio;
+use App\Models\Vehiculo;
 use Illuminate\Http\Request;
 
 // Reporte del caso (Carlos): pendientes e ingresos (C8), historial por vehículo (C9)
@@ -38,9 +40,27 @@ class ReporteController extends Controller
         return view('reportes.index', compact('pendientes', 'ingresos', 'totalGeneral'));
     }
 
-    public function historial(Request $request)
+    // [INYECCION-DEPENDENCIAS] Laravel crea y valida HistorialVehiculoRequest antes de llamar al método.
+    // [CRUD-READ] Historial de servicios de un vehículo, con total gastado y último kilometraje.
+    public function historial(HistorialVehiculoRequest $request)
     {
-        abort(501, 'Pendiente: C9 (Carlos)');
+        $vehiculos = Vehiculo::orderBy('placa')->get(['id', 'placa', 'propietario_nombre']);
+
+        $vehiculo = null;
+        $totalGastado = 0.0;
+        $ultimoKilometraje = null;
+
+        if ($id = $request->validated('vehiculo_id')) {
+            $vehiculo = Vehiculo::findOrFail($id)->load([
+                'ordenes' => fn ($q) => $q->orderByDesc('fecha_ingreso')->orderByDesc('id'),
+                'ordenes.tipoServicio',
+            ]);
+            // Métodos de dominio del modelo (C4): una sola fuente de verdad para la ficha y el reporte.
+            $totalGastado = $vehiculo->totalGastado();
+            $ultimoKilometraje = $vehiculo->ultimoKilometraje();
+        }
+
+        return view('reportes.historial', compact('vehiculos', 'vehiculo', 'totalGastado', 'ultimoKilometraje'));
     }
 
     public function exportar(Request $request)

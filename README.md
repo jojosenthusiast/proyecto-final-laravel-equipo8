@@ -514,6 +514,10 @@ Todas las órdenes cumplen `costo_total = precio_base + costo_adicional` y la fe
 
 Solo las órdenes finalizadas cuentan como ingreso. Las relaciones se cargan con `with()`, así la página no hace una consulta por fila. Se comprueba con `php artisan test --filter=ReporteTest`.
 
+#### Historial por vehículo (`/reportes/historial`)
+
+Un selector envía `vehiculo_id` por GET. `HistorialVehiculoRequest` lo valida (`nullable`, `integer`, `exists:vehiculos,id`) con mensajes en español; si no es válido, la página vuelve al selector y muestra el error junto al campo. Con un vehículo válido se cargan sus órdenes de la más reciente a la más antigua junto con su tipo de servicio (`load`), y se muestran `totalGastado()` y `ultimoKilometraje()` del modelo. Se comprueba con `php artisan test --filter=ReporteHistorialTest`.
+
 
 
 

@@ -5,6 +5,8 @@
 @section('contenido')
     <h1 class="titulo-pagina">Reporte del taller</h1>
 
+    <p><a class="boton" href="{{ route('reportes.historial') }}">Historial por vehículo</a></p>
+
     <section aria-labelledby="titulo-pendientes">
         <h2 id="titulo-pendientes">Órdenes pendientes</h2>
 
