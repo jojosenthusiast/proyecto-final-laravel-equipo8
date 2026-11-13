@@ -39,4 +39,31 @@ class VehiculoController extends Controller
 
         return view('vehiculos.show', compact('vehiculo'));
     }
+
+    // Esqueletos fijados en C6: las firmas son contrato. Jorge reemplaza cada abort(501) en su
+    // commit y puede cambiar Request por su Form Request sin cambiar el nombre del método.
+    public function create()
+    {
+        abort(501, 'Pendiente: J4 (Jorge)');
+    }
+
+    public function store(Request $request)
+    {
+        abort(501, 'Pendiente: J4 (Jorge)');
+    }
+
+    public function edit(Vehiculo $vehiculo)
+    {
+        abort(501, 'Pendiente: J5 (Jorge)');
+    }
+
+    public function update(Request $request, Vehiculo $vehiculo)
+    {
+        abort(501, 'Pendiente: J5 (Jorge)');
+    }
+
+    public function destroy(Vehiculo $vehiculo)
+    {
+        abort(501, 'Pendiente: J6 (Jorge)');
+    }
 }

@@ -455,3 +455,70 @@ los registros de la base de datos.
 - PanelController: obtiene indicadores y órdenes.
 
 Las consultas se realizan sin concatenar SQL manualmente.
+
+## Fase 2
+
+Cada integrante escribe solo dentro de su subsección. Las subsecciones están separadas por varias líneas en blanco para que git combine los cambios paralelos sin conflictos. Los contratos comunes (rutas, métodos de los modelos, fábricas y marcado HTML) están en [docs/CONTRATOS-FASE2.md](docs/CONTRATOS-FASE2.md).
+
+
+
+
+
+### Instalación y seguridad (Ángel)
+
+*Pendiente: Ángel documenta aquí la instalación, las pruebas, el usuario de desarrollo, la seguridad y el flujo de Git.*
+
+
+
+
+
+### Reporte (Carlos)
+
+#### Cambios de esquema de la Fase 2
+
+La Fase 2 tiene un solo cambio de esquema, hecho con dos migraciones nuevas. Las migraciones de la Fase 1 no se editan: la regla de continuidad del enunciado exige que todo cambio sea una migración nueva con `down()` reversible.
+
+| Migración | Qué agrega | Para qué |
+| --- | --- | --- |
+| `2026_11_13_000001_add_costo_adicional_to_ordenes_servicio_table` | Columna `costo_adicional` decimal(10,2) con valor por defecto 0 e índice `(estado, fecha_ingreso)` en `ordenes_servicio` | El backend calcula `costo_total = precio_base + costo_adicional`. El índice sirve al reporte y al panel, que filtran por estado y período. |
+| `2026_11_13_000002_add_indices_to_vehiculos_table` | Índices en `vehiculos.marca` y `vehiculos.propietario_nombre` | El filtro por marca y la búsqueda por propietario no recorren la tabla completa. |
+
+El valor por defecto 0 mantiene válidas las órdenes y los seeders que ya existían. Se comprueba con `php artisan test --filter=EsquemaFase2Test`, `php artisan migrate:fresh --seed` y `php artisan migrate:rollback --step=2`.
+
+#### Métodos de dominio y fábricas
+
+- `OrdenServicio`: constantes `ESTADOS` y `TRANSICIONES`; scopes `estado()`, `pendientes()` y `delPeriodo()`; métodos `estaFinalizada()`, `puedeEditarse()` y `siguienteEstado()`.
+- `Vehiculo`: `ultimoKilometraje(?int $ignorarOrdenId = null)` (regla 3) y `totalGastado()` (suma de las órdenes finalizadas).
+- Fábricas: `OrdenServicio::factory()->pendiente()`, `->enProceso()`, `->finalizada()`; `TipoServicio::factory()`; `Vehiculo::factory()->conKilometraje(n)`.
+
+
+
+
+
+### Imágenes y catálogo (Fernando)
+
+*Pendiente: Fernando documenta aquí el manejo de imágenes y el catálogo de servicios.*
+
+
+
+
+
+### Vehículos (Jorge)
+
+*Pendiente: Jorge documenta aquí el CRUD de vehículos y las reglas 1, 2 y 3.*
+
+
+
+
+
+### Órdenes (Leo)
+
+*Pendiente: Leo documenta aquí el módulo de órdenes y las reglas 3, 4 y 5.*
+
+
+
+
+
+### Interfaz y cierre (Milton)
+
+*Pendiente: Milton documenta aquí la interfaz adaptable, el panel, las capturas y la distribución del trabajo.*
