@@ -44,6 +44,24 @@ class Vehiculo extends Model
         return $this->hasMany(OrdenServicio::class);
     }
 
+    // [REGLA-NEGOCIO] Regla 3: el kilometraje de una orden nueva no puede ser menor que este valor.
+    // Es el mayor entre el kilometraje del vehículo y el de sus órdenes. Al editar una orden se pasa
+    // su id en $ignorarOrdenId para no compararla consigo misma.
+    public function ultimoKilometraje(?int $ignorarOrdenId = null): int
+    {
+        $maximoOrdenes = $this->ordenes()
+            ->when($ignorarOrdenId, fn ($consulta, $id) => $consulta->whereKeyNot($id))
+            ->max('kilometraje_ingreso');
+
+        return max((int) $this->kilometraje, (int) $maximoOrdenes);
+    }
+
+    // [ENCAPSULAMIENTO] Suma del costo de las órdenes finalizadas, calculada por la base de datos.
+    public function totalGastado(): float
+    {
+        return (float) $this->ordenes()->estado('finalizada')->sum('costo_total');
+    }
+
     // [ENCAPSULAMIENTO] Las vistas piden $vehiculo->imagen_url y nunca arman la ruta a mano:
     // si no hay foto subida a storage, se usa la imagen por defecto de Biela.
     protected function imagenUrl(): Attribute
