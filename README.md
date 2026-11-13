@@ -518,6 +518,14 @@ Solo las órdenes finalizadas cuentan como ingreso. Las relaciones se cargan con
 
 Un selector envía `vehiculo_id` por GET. `HistorialVehiculoRequest` lo valida (`nullable`, `integer`, `exists:vehiculos,id`) con mensajes en español; si no es válido, la página vuelve al selector y muestra el error junto al campo. Con un vehículo válido se cargan sus órdenes de la más reciente a la más antigua junto con su tipo de servicio (`load`), y se muestran `totalGastado()` y `ultimoKilometraje()` del modelo. Se comprueba con `php artisan test --filter=ReporteHistorialTest`.
 
+#### Filtro por fechas y exportación a CSV
+
+- `FiltroReporteRequest` valida `desde` y `hasta` (`nullable`, `date`; `hasta` con `after_or_equal:desde` cuando hay fecha inicial) con mensajes en español. Sin fechas, el reporte muestra el mes actual.
+- El período se aplica con el scope `delPeriodo()` a los pendientes, al total y dentro de los closures de `withCount` y `withSum`. La consulta de ingresos está en un método privado que comparten la página y el CSV, así los dos muestran los mismos números.
+- **Exportar ingresos a CSV** (`/reportes/exportar`, extra +3) descarga `ingresos-por-servicio.csv` con `response()->streamDownload()` y `fputcsv`, sin paquetes externos. El archivo empieza con el BOM UTF-8 para que Excel muestre las tildes, tiene los encabezados Servicio, Órdenes e Ingresos y respeta el mismo filtro de fechas.
+
+Se comprueba con `php artisan test --filter=ReporteCsvTest`.
+
 
 
 

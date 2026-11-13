@@ -7,6 +7,27 @@
 
     <p><a class="boton" href="{{ route('reportes.historial') }}">Historial por vehículo</a></p>
 
+    <form class="filtro" method="GET" action="{{ route('reportes.index') }}">
+        <div class="campo">
+            <label for="desde">Desde</label>
+            <input type="date" id="desde" name="desde" value="{{ old('desde', $desde) }}"
+                @error('desde') aria-invalid="true" aria-describedby="desde-error" @enderror>
+            @error('desde')
+                <p class="error-campo" id="desde-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <div class="campo">
+            <label for="hasta">Hasta</label>
+            <input type="date" id="hasta" name="hasta" value="{{ old('hasta', $hasta) }}"
+                @error('hasta') aria-invalid="true" aria-describedby="hasta-error" @enderror>
+            @error('hasta')
+                <p class="error-campo" id="hasta-error">{{ $message }}</p>
+            @enderror
+        </div>
+        <button class="boton" type="submit">Filtrar</button>
+        <a class="boton" href="{{ route('reportes.exportar', array_filter(['desde' => $desde, 'hasta' => $hasta])) }}">Exportar ingresos a CSV</a>
+    </form>
+
     <section aria-labelledby="titulo-pendientes">
         <h2 id="titulo-pendientes">Órdenes pendientes</h2>
 

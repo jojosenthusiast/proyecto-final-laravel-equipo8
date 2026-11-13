@@ -20,6 +20,10 @@ class ReporteTest extends TestCase
     {
         parent::setUp();
 
+        // Fecha fija: desde C10 el reporte filtra por defecto el mes actual, y la pendiente de
+        // hace 3 días debe caer en el mismo mes.
+        $this->travelTo('2026-11-13 10:00:00');
+
         // Datos conocidos: dos finalizadas de 25.00 y 40.00 en Frenos y una pendiente de 100.00.
         $this->frenos = TipoServicio::factory()->create(['nombre' => 'Frenos']);
         $hoy = now()->toDateString();
