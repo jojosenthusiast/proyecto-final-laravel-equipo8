@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             VehiculoSeeder::class,
 
             OrdenServicioSeeder::class,
+
+            EscenariosDefensaSeeder::class,
         ]);
     }
 }

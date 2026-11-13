@@ -491,6 +491,19 @@ El valor por defecto 0 mantiene válidas las órdenes y los seeders que ya exist
 - `Vehiculo`: `ultimoKilometraje(?int $ignorarOrdenId = null)` (regla 3) y `totalGastado()` (suma de las órdenes finalizadas).
 - Fábricas: `OrdenServicio::factory()->pendiente()`, `->enProceso()`, `->finalizada()`; `TipoServicio::factory()`; `Vehiculo::factory()->conKilometraje(n)`.
 
+#### Escenarios de la defensa
+
+`php artisan migrate:fresh --seed` ejecuta `EscenariosDefensaSeeder` después de los datos de la Fase 1. Crea cuatro vehículos con placa fija para probar cada regla en vivo. El seeder es idempotente: busca cada vehículo por placa y solo crea sus órdenes si no tiene ninguna.
+
+| Placa | Órdenes | Qué se prueba |
+| --- | --- | --- |
+| P000001 | Una orden finalizada en el mes actual | Regla 5: la orden finalizada no puede editarse. |
+| P000002 | Una orden pendiente a 85 000 km | Regla 3: una orden nueva con 80 000 km se rechaza. |
+| P000003 | Ninguna | El vehículo se puede eliminar. |
+| P000004 | Dos finalizadas (hace uno y dos meses) y una en proceso | El vehículo no se puede eliminar; el filtro de fechas del reporte tiene datos en los últimos tres meses. |
+
+Todas las órdenes cumplen `costo_total = precio_base + costo_adicional` y la fecha de entrega nunca es anterior a la de ingreso. Se comprueba con `php artisan test --filter=EscenariosDefensaTest`.
+
 
 
 
