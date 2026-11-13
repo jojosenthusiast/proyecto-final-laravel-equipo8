@@ -41,4 +41,12 @@ class VehiculoFactory extends Factory
             'imagen' => null,
         ];
     }
+
+    // Vehículo con un kilometraje exacto, para probar la regla 3 con valores conocidos.
+    public function conKilometraje(int $km): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'kilometraje' => $km,
+        ]);
+    }
 }

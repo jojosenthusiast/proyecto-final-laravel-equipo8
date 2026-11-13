@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\TipoServicioFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TipoServicio extends Model
 {
+    /** @use HasFactory<TipoServicioFactory> */
+    use HasFactory;
+
     // Laravel pluraliza en inglés y buscaría "tipo_servicios", que no existe.
     protected $table = 'tipos_servicio';
 
