@@ -20,6 +20,7 @@ class OrdenServicio extends Model
         'fecha_ingreso',
         'fecha_entrega',
         'kilometraje_ingreso',
+        'costo_adicional',
         'descripcion',
         'costo_total',
         'estado',
@@ -33,6 +34,8 @@ class OrdenServicio extends Model
             'fecha_entrega' => 'date',
             'kilometraje_ingreso' => 'integer',
             'costo_total' => 'decimal:2',
+            // [ENCAPSULAMIENTO] Fase 2: el recargo sobre el precio base también es dinero.
+            'costo_adicional' => 'decimal:2',
         ];
     }
 
