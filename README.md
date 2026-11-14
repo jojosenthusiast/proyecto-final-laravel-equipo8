@@ -885,7 +885,17 @@ El campo «Buscar» de `/vehiculos` (`?buscar=`) encuentra vehículos por parte 
 - Si un filtro llega como arreglo (`?marca[]=x`), se ignora en lugar de producir un error 500.
 - Sin resultados, la página muestra «Ningún vehículo coincide con la búsqueda.» y un enlace para quitar los filtros.
 
-Cada celda de la tabla lleva `data-label` con el nombre de su columna, según el contrato de marcado. Se comprueba con `php artisan test --filter=VehiculoBusquedaTest`.
+Cada celda de la tabla lleva `data-label` con el nombre de su columna, según el contrato de marcado.
+
+#### Orden del listado
+
+Los encabezados Placa, Año y Kilometraje son enlaces que ordenan el listado (`?orden=anio&direccion=desc`). Si se pulsa el encabezado de la columna activa, se invierte la dirección (▲ ascendente, ▼ descendente). Los enlaces conservan la búsqueda y la marca, y el formulario de búsqueda conserva el orden.
+
+- **Lista blanca:** `orderBy()` enlaza los valores pero no el nombre de la columna, así que `?orden=` se compara con `['placa', 'anio', 'kilometraje']` antes de llegar a la consulta. Cualquier otro valor, como `?orden=placa;drop table vehiculos`, se ignora y el listado se ordena por placa, sin error.
+- **Dirección:** solo `asc` o `desc`; cualquier otro valor se trata como `asc`.
+- **Desempate:** con años o kilometrajes repetidos, la placa decide el orden, así cada vehículo queda siempre en la misma página.
+
+Se comprueba con `php artisan test --filter=VehiculoBusquedaTest`.
 
 
 

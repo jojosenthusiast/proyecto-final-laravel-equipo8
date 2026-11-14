@@ -78,6 +78,74 @@ class VehiculoBusquedaTest extends TestCase
             ->assertViewHas('vehiculos', fn ($pagina) => $pagina->total() === 3);
     }
 
+    private function crearTresVehiculos(): void
+    {
+        Vehiculo::factory()->create(['placa' => 'P500002', 'anio' => 2020, 'kilometraje' => 10000, 'marca' => 'Kia', 'modelo' => 'Rio']);
+        Vehiculo::factory()->create(['placa' => 'P500003', 'anio' => 1998, 'kilometraje' => 250000, 'marca' => 'Kia', 'modelo' => 'Rio']);
+        Vehiculo::factory()->create(['placa' => 'P500001', 'anio' => 2010, 'kilometraje' => 90000, 'marca' => 'Honda', 'modelo' => 'Fit']);
+    }
+
+    private function placasEnOrden(string $url): array
+    {
+        return $this->get($url)->assertOk()->viewData('vehiculos')->pluck('placa')->all();
+    }
+
+    public function test_sin_parametros_el_listado_se_ordena_por_placa(): void
+    {
+        $this->crearTresVehiculos();
+
+        $this->assertSame(['P500001', 'P500002', 'P500003'], $this->placasEnOrden('/vehiculos'));
+    }
+
+    public function test_ordena_por_anio_y_por_kilometraje_en_ambas_direcciones(): void
+    {
+        $this->crearTresVehiculos();
+
+        $this->assertSame(['P500003', 'P500001', 'P500002'], $this->placasEnOrden('/vehiculos?orden=anio'));
+        $this->assertSame(['P500002', 'P500001', 'P500003'], $this->placasEnOrden('/vehiculos?orden=anio&direccion=desc'));
+        $this->assertSame(['P500003', 'P500001', 'P500002'], $this->placasEnOrden('/vehiculos?orden=kilometraje&direccion=desc'));
+        $this->assertSame(['P500003', 'P500002', 'P500001'], $this->placasEnOrden('/vehiculos?orden=placa&direccion=desc'));
+    }
+
+    public function test_una_columna_no_permitida_se_ignora_y_ordena_por_placa(): void
+    {
+        $this->crearTresVehiculos();
+
+        $this->assertSame(['P500001', 'P500002', 'P500003'], $this->placasEnOrden('/vehiculos?orden='.urlencode('placa;drop table vehiculos')));
+        $this->assertSame(['P500001', 'P500002', 'P500003'], $this->placasEnOrden('/vehiculos?orden=propietario_telefono'));
+        $this->assertSame(['P500001', 'P500002', 'P500003'], $this->placasEnOrden('/vehiculos?orden[]=anio'));
+        $this->assertSame(3, Vehiculo::count(), 'La tabla sigue intacta.');
+    }
+
+    public function test_una_direccion_no_permitida_se_trata_como_ascendente(): void
+    {
+        $this->crearTresVehiculos();
+
+        $this->assertSame(['P500003', 'P500001', 'P500002'], $this->placasEnOrden('/vehiculos?orden=anio&direccion='.urlencode('desc; drop table vehiculos')));
+    }
+
+    public function test_el_orden_se_combina_con_la_busqueda_y_la_marca(): void
+    {
+        $this->crearTresVehiculos();
+
+        $this->assertSame(['P500002', 'P500003'], $this->placasEnOrden('/vehiculos?buscar=rio&marca=Kia&orden=kilometraje'));
+        $this->assertSame(['P500003', 'P500002'], $this->placasEnOrden('/vehiculos?buscar=rio&marca=Kia&orden=kilometraje&direccion=desc'));
+    }
+
+    public function test_los_encabezados_alternan_la_direccion_y_conservan_la_busqueda_y_la_marca(): void
+    {
+        $this->crearTresVehiculos();
+
+        $respuesta = $this->get('/vehiculos?buscar=rio&marca=Kia&orden=anio&direccion=asc')->assertOk();
+
+        // La columna activa invierte su dirección; las demás empiezan en ascendente.
+        $respuesta->assertSee(e(route('vehiculos.index', ['buscar' => 'rio', 'marca' => 'Kia', 'orden' => 'anio', 'direccion' => 'desc'])), false);
+        $respuesta->assertSee(e(route('vehiculos.index', ['buscar' => 'rio', 'marca' => 'Kia', 'orden' => 'kilometraje', 'direccion' => 'asc'])), false);
+        $respuesta->assertSee('aria-sort="ascending"', false);
+        // El formulario de búsqueda conserva el orden elegido.
+        $respuesta->assertSee('<input type="hidden" name="orden" value="anio">', false);
+    }
+
     public function test_el_formulario_conserva_el_texto_buscado_y_cada_celda_tiene_su_etiqueta(): void
     {
         Vehiculo::factory()->create(['modelo' => 'Corolla']);

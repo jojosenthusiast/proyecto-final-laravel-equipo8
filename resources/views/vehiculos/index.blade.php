@@ -17,6 +17,12 @@
             @endforeach
         </select>
 
+        {{-- Al buscar o cambiar la marca se conserva el orden elegido en los encabezados. --}}
+        @if ($orden !== 'placa' || $direccion !== 'asc')
+            <input type="hidden" name="orden" value="{{ $orden }}">
+            <input type="hidden" name="direccion" value="{{ $direccion }}">
+        @endif
+
         <button class="boton" type="submit">Filtrar</button>
 
         @if ($filtrado)
@@ -31,14 +37,28 @@
             <p class="vacio">Todavía no hay vehículos registrados.</p>
         @endif
     @else
+        @php
+            // Cada encabezado ordenable enlaza al mismo listado con su columna. Si ya es la columna
+            // activa, el enlace invierte la dirección. La búsqueda y la marca se conservan y la
+            // paginación vuelve a la página 1.
+            $enlaceOrden = fn (string $columna) => route('vehiculos.index', $filtros + [
+                'orden' => $columna,
+                'direccion' => $orden === $columna && $direccion === 'asc' ? 'desc' : 'asc',
+            ]);
+            $ariaSort = fn (string $columna) => $orden === $columna
+                ? ($direccion === 'asc' ? 'ascending' : 'descending')
+                : 'none';
+            $flecha = fn (string $columna) => $orden === $columna ? ($direccion === 'asc' ? ' ▲' : ' ▼') : '';
+        @endphp
+
         <table class="tabla">
             <thead>
                 <tr>
                     <th>Foto</th>
-                    <th>Placa</th>
+                    <th aria-sort="{{ $ariaSort('placa') }}"><a href="{{ $enlaceOrden('placa') }}">Placa{{ $flecha('placa') }}</a></th>
                     <th>Marca y modelo</th>
-                    <th>Año</th>
-                    <th>Kilometraje</th>
+                    <th aria-sort="{{ $ariaSort('anio') }}"><a href="{{ $enlaceOrden('anio') }}">Año{{ $flecha('anio') }}</a></th>
+                    <th aria-sort="{{ $ariaSort('kilometraje') }}"><a href="{{ $enlaceOrden('kilometraje') }}">Kilometraje{{ $flecha('kilometraje') }}</a></th>
                     <th>Propietario</th>
                     <th>Órdenes</th>
                     <th>Acciones</th>
