@@ -858,7 +858,22 @@ php artisan test --filter='ImagenVehiculoServiceTest|ReglaKilometrajeTest|Vehicu
 
 ### Vehículos (Jorge)
 
-*Pendiente: Jorge documenta aquí el CRUD de vehículos y las reglas 1, 2 y 3.*
+#### Validación del vehículo (reglas 1 y 2)
+
+El registro usa `StoreVehiculoRequest` y la edición usa `UpdateVehiculoRequest`, que hereda las mismas reglas y solo cambia la de placa única. Antes de validar, la placa se pasa a mayúsculas y se le quitan los espacios: «p123456 » se guarda como «P123456».
+
+| Campo | Reglas | Mensaje si falla |
+| --- | --- | --- |
+| `placa` | Obligatoria, formato `P` + 6 dígitos (`regex:/^P\d{6}$/`), única. En la edición, `Rule::unique()->ignore()` excluye al propio vehículo. | «La placa debe tener el formato P123456.» / «Ya hay un vehículo registrado con esa placa.» |
+| `anio` | Obligatorio, entero, entre 1980 y el año actual + 1, que se calcula en cada petición. | «El año debe estar entre 1980 y 2027.» (en 2026) |
+| `marca`, `modelo` | Obligatorios, máximo 50 caracteres. | «La marca no puede tener más de 50 caracteres.» |
+| `color` | Obligatorio, máximo 30 caracteres. | |
+| `kilometraje` | Obligatorio, entero de 0 a 999 999. | «El kilometraje no puede ser negativo.» |
+| `propietario_nombre` | Obligatorio, máximo 100 caracteres. | |
+| `propietario_telefono` | Obligatorio, formato `0000-0000`. | «El teléfono debe tener el formato 0000-0000.» |
+| `imagen` | Opcional; JPG, PNG o WEBP de hasta 2 MB. | «La imagen debe ser JPG, PNG o WEBP.» / «La imagen no puede pesar más de 2 MB.» |
+
+La aplicación usa el idioma por defecto de Laravel, así que cada mensaje está escrito en español en `messages()` y los nombres de los campos en `attributes()`. Se comprueba con `php artisan test --filter=VehiculoReglasTest`.
 
 
 
