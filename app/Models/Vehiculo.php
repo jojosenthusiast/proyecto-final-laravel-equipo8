@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\VehiculoFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -60,6 +61,21 @@ class Vehiculo extends Model
     public function totalGastado(): float
     {
         return (float) $this->ordenes()->estado('finalizada')->sum('costo_total');
+    }
+
+    // [SEGURIDAD] Búsqueda del listado por placa, propietario o modelo. El texto viaja como parámetro
+    // enlazado de PDO aunque el patrón lleve %, así que no es SQL concatenado. El closure del where
+    // agrupa los OR entre paréntesis: «marca = X AND (placa LIKE ... OR modelo LIKE ...)». Sin
+    // paréntesis, el AND se aplicaría solo al último OR y aparecerían vehículos de otras marcas.
+    // Eloquent ya agrupa las condiciones de un scope, pero el closure lo deja explícito.
+    public function scopeBuscar(Builder $consulta, ?string $texto): Builder
+    {
+        $texto = trim((string) $texto);
+
+        return $consulta->when($texto !== '', fn ($consulta) => $consulta->where(fn ($grupo) => $grupo
+            ->where('placa', 'like', "%{$texto}%")
+            ->orWhere('propietario_nombre', 'like', "%{$texto}%")
+            ->orWhere('modelo', 'like', "%{$texto}%")));
     }
 
     // [ENCAPSULAMIENTO] Las vistas piden $vehiculo->imagen_url y nunca arman la ruta a mano:

@@ -875,6 +875,18 @@ El registro usa `StoreVehiculoRequest` y la edición usa `UpdateVehiculoRequest`
 
 La aplicación usa el idioma por defecto de Laravel, así que cada mensaje está escrito en español en `messages()` y los nombres de los campos en `attributes()`. Se comprueba con `php artisan test --filter=VehiculoReglasTest`.
 
+#### Búsqueda en el listado
+
+El campo «Buscar» de `/vehiculos` (`?buscar=`) encuentra vehículos por parte de la placa, del nombre del propietario o del modelo, y se combina con el filtro de marca. Por ejemplo, `?buscar=ana&marca=Toyota` devuelve solo los Toyota cuyo propietario se llama Ana. La búsqueda vive en el scope `Vehiculo::scopeBuscar()`:
+
+- El texto llega a la consulta como parámetro enlazado de PDO, aunque el patrón lleve `%`, así que no es SQL concatenado. Una comilla simple o un `' OR 1=1 --` se buscan como texto normal.
+- Los tres `orWhere` van dentro de un closure, que los encierra entre paréntesis: `(placa LIKE ? OR propietario_nombre LIKE ? OR modelo LIKE ?) AND marca = ?`.
+- `withQueryString()` hace que la paginación conserve la búsqueda y la marca.
+- Si un filtro llega como arreglo (`?marca[]=x`), se ignora en lugar de producir un error 500.
+- Sin resultados, la página muestra «Ningún vehículo coincide con la búsqueda.» y un enlace para quitar los filtros.
+
+Cada celda de la tabla lleva `data-label` con el nombre de su columna, según el contrato de marcado. Se comprueba con `php artisan test --filter=VehiculoBusquedaTest`.
+
 
 
 

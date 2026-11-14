@@ -11,19 +11,35 @@ class VehiculoController extends Controller
     // withCount cuenta las órdenes en la misma consulta, sin una consulta extra por fila.
     public function index(Request $request)
     {
-        // La marca viaja como parámetro de where(), nunca concatenada en el SQL.
-        // withQueryString() hace que la página 2 de un listado filtrado conserve la marca.
+        $buscar = $this->textoDeConsulta($request, 'buscar');
+        $marca = $this->textoDeConsulta($request, 'marca');
+
+        // La marca y el texto viajan como parámetros enlazados, nunca concatenados en el SQL.
+        // Los dos filtros se combinan con AND. withQueryString() hace que la página 2 de un
+        // listado filtrado conserve la búsqueda y la marca.
         $vehiculos = Vehiculo::withCount('ordenes')
-            ->when($request->query('marca'), fn ($consulta, $marca) => $consulta->where('marca', $marca))
+            ->buscar($buscar)
+            ->when($marca, fn ($consulta, $marca) => $consulta->where('marca', $marca))
             ->orderBy('placa')
             ->paginate(10)
             ->withQueryString();
 
         return view('vehiculos.index', [
             'vehiculos' => $vehiculos,
+            'buscar' => $buscar,
+            'filtrado' => $buscar !== '' || $marca !== '',
             // Las opciones del filtro salen de la base, no de una lista escrita a mano.
             'marcas' => Vehiculo::select('marca')->distinct()->orderBy('marca')->pluck('marca'),
         ]);
+    }
+
+    // [SEGURIDAD] Un filtro de la URL solo se acepta como texto. Si alguien manda ?marca[]=x,
+    // se ignora en lugar de llegar como arreglo a la consulta y provocar un error 500.
+    private function textoDeConsulta(Request $request, string $clave): string
+    {
+        $valor = $request->query($clave);
+
+        return is_string($valor) ? trim($valor) : '';
     }
 
     // [CRUD-READ] Ficha del vehículo. El parámetro Vehiculo es route model binding:
