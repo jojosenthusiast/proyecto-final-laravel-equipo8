@@ -897,6 +897,21 @@ Los encabezados Placa, Año y Kilometraje son enlaces que ordenan el listado (`?
 
 Se comprueba con `php artisan test --filter=VehiculoBusquedaTest`.
 
+#### Ficha como centro de acciones
+
+Desde `/vehiculos/{vehiculo}` se llega a todas las acciones del vehículo y de sus órdenes:
+
+| Acción | A dónde lleva | Quién la ve |
+| --- | --- | --- |
+| Registrar orden | `route('ordenes.create', ['vehiculo' => $vehiculo])`, es decir `/ordenes/create?vehiculo=ID`. El formulario de órdenes lee el parámetro y deja el vehículo preseleccionado. | Todos |
+| Ver orden (una por fila del historial) | `ordenes.show` de esa orden | Todos |
+| Editar | `vehiculos.edit` | Solo con sesión (`@auth`) |
+| Eliminar | Formulario `POST` con `@csrf`, `@method('DELETE')` y confirmación `data-confirmar` | Solo con sesión (`@auth`) |
+
+La ficha muestra tres indicadores calculados por el modelo: la cantidad de órdenes, el total gastado (`Vehiculo::totalGastado()`, que suma solo las órdenes finalizadas) y el último kilometraje (`Vehiculo::ultimoKilometraje()`, el mayor entre el del vehículo y el de sus órdenes). El historial va de la orden más reciente a la más antigua, y cada estado usa su etiqueta de color (`etiqueta-pendiente`, `etiqueta-en-proceso`, `etiqueta-finalizada`).
+
+Las órdenes y su tipo de servicio se cargan juntos con `load(['ordenes' => ..., 'ordenes.tipoServicio'])`. Como `preventLazyLoading` está activo fuera de producción, olvidar el tipo de servicio no pasaría en silencio: la página fallaría con `LazyLoadingViolationException`. Se comprueba con `php artisan test --filter=VehiculoFichaTest`.
+
 
 
 

@@ -62,16 +62,26 @@ class VehiculoController extends Controller
 
     // [CRUD-READ] Ficha del vehículo. El parámetro Vehiculo es route model binding:
     // Laravel busca el registro por su llave y responde 404 si no existe.
+    // La ficha es el centro de acciones del vehículo: desde aquí se registra una orden nueva, se
+    // abre cada orden y se edita o elimina el vehículo.
     public function show(Vehiculo $vehiculo)
     {
-        // Las órdenes se cargan de la más reciente a la más antigua y con su tipo
-        // de servicio en la misma tanda, para no consultar una vez por cada fila.
+        // [RELACION] Las órdenes se cargan de la más reciente a la más antigua y con su tipo de
+        // servicio en la misma tanda (eager loading), para no consultar una vez por cada fila.
+        // Con preventLazyLoading activo, olvidar 'ordenes.tipoServicio' lanzaría una excepción.
         $vehiculo->load([
-            'ordenes' => fn ($consulta) => $consulta->orderByDesc('fecha_ingreso'),
+            'ordenes' => fn ($consulta) => $consulta->latest('fecha_ingreso')->latest('id'),
             'ordenes.tipoServicio',
         ]);
 
-        return view('vehiculos.show', compact('vehiculo'));
+        return view('vehiculos.show', [
+            'vehiculo' => $vehiculo,
+            // [ENCAPSULAMIENTO] Los cálculos viven en el modelo (C4) y los hace la base de datos:
+            // el total suma solo las órdenes finalizadas y el último kilometraje es el mayor entre
+            // el del vehículo y el de sus órdenes (regla 3).
+            'totalGastado' => $vehiculo->totalGastado(),
+            'ultimoKilometraje' => $vehiculo->ultimoKilometraje(),
+        ]);
     }
 
     // Esqueletos fijados en C6: las firmas son contrato. Jorge reemplaza cada abort(501) en su
