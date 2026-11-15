@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTipoServicioRequest;
+use App\Http\Requests\UpdateTipoServicioRequest;
 use App\Models\TipoServicio;
-use Illuminate\Http\Request;
 
 class TipoServicioController extends Controller
 {
@@ -26,24 +27,32 @@ class TipoServicioController extends Controller
         abort(501, 'Pendiente: F8 (Fernando)');
     }
 
-    public function create()
+    public function create() // [CRUD-CREATE]
     {
-        abort(501, 'Pendiente: F5 (Fernando)');
+        return view('servicios.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreTipoServicioRequest $request) // [CRUD-CREATE]
     {
-        abort(501, 'Pendiente: F5 (Fernando)');
+        $tipo = TipoServicio::create($request->validated());
+
+        return redirect()
+            ->route('servicios.index')
+            ->with('exito', "Servicio «{$tipo->nombre}» registrado correctamente.");
     }
 
-    public function edit(TipoServicio $servicio)
+    public function edit(TipoServicio $servicio) // [CRUD-UPDATE]
     {
-        abort(501, 'Pendiente: F5 (Fernando)');
+        return view('servicios.edit', compact('servicio'));
     }
 
-    public function update(Request $request, TipoServicio $servicio)
+    public function update(UpdateTipoServicioRequest $request, TipoServicio $servicio) // [CRUD-UPDATE]
     {
-        abort(501, 'Pendiente: F5 (Fernando)');
+        $servicio->update($request->validated());
+
+        return redirect()
+            ->route('servicios.index')
+            ->with('exito', "Servicio «{$servicio->nombre}» actualizado correctamente.");
     }
 
     public function destroy(TipoServicio $servicio)

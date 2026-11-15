@@ -84,7 +84,7 @@ class RutasContratoTest extends TestCase
         // Si vehiculos/{vehiculo} se registrara antes, "create" se tomaría como id y daría 404.
         $this->iniciarSesion()->get('/vehiculos/create')->assertStatus(501);
         $this->iniciarSesion()->get('/ordenes/create')->assertStatus(501);
-        $this->iniciarSesion()->get('/servicios/create')->assertStatus(501);
+        $this->iniciarSesion()->get('/servicios/create')->assertOk();
     }
 
     public function test_el_menu_enlaza_ordenes_servicios_y_reportes(): void

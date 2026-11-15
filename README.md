@@ -817,6 +817,18 @@ La base de datos guarda solo la ruta, nunca el binario. Los archivos viven en `s
 
 `KilometrajeNoMenorAlUltimo` (`app/Rules/KilometrajeNoMenorAlUltimo.php`) es un objeto `Rule` que compara el kilometraje enviado con `Vehiculo::ultimoKilometraje()`. Si el valor es menor, falla con el mensaje «El kilometraje no puede ser menor que el último registrado (N km).». Si el vehículo no existe, la regla no falla y deja el error a `exists:vehiculos,id`. Al editar una orden se pasa su id como segundo argumento para no compararla consigo misma. Se comprueba con `php artisan test --filter=ReglaKilometrajeTest`.
 
+#### Catálogo de servicios
+
+El catálogo se administra desde `/servicios` con sesión iniciada. `TipoServicioController` implementa `create`, `store`, `edit` y `update`; el registro y la edición comparten el formulario `servicios/partials/formulario.blade.php`, que conserva los valores con `old()` y muestra cada error junto a su campo.
+
+`StoreTipoServicioRequest` y `UpdateTipoServicioRequest` validan:
+
+- `nombre`: obligatorio, texto, máximo 60 caracteres y único (en la edición se ignora el propio servicio).
+- `precio_base`: obligatorio, numérico, mayor que cero y máximo 99999.99.
+- `descripcion`: opcional, texto, máximo 255 caracteres.
+
+Los mensajes están en español. Se comprueba con `php artisan test --filter=TipoServicioCrudTest`.
+
 
 
 
