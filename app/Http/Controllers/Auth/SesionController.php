@@ -3,23 +3,47 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-// Esqueleto fijado en C6: Ángel lo completa en A2 (LoginRequest en store).
 class SesionController extends Controller
 {
     public function create()
     {
-        abort(501, 'Pendiente: A2 (Ángel)');
+        return view('auth.login');
     }
 
-    public function store(Request $request)
+    public function store(LoginRequest $request)
     {
-        abort(501, 'Pendiente: A2 (Ángel)');
+        $credenciales = $request->only('email', 'password');
+
+        if (!Auth::attempt(
+            $credenciales,
+            $request->boolean('recordar')
+        )) {
+            return back()
+                ->withErrors([
+                    'email' => 'Las credenciales ingresadas son incorrectas.',
+                ])
+                ->withInput($request->only('email'));
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended('/')
+            ->with('exito', 'Sesión iniciada correctamente.');
     }
 
     public function destroy(Request $request)
     {
-        abort(501, 'Pendiente: A2 (Ángel)');
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/')
+            ->with('exito', 'Sesión cerrada correctamente.');
     }
 }
