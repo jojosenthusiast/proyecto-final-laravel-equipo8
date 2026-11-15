@@ -19,7 +19,7 @@ Route::post('/login', [SesionController::class, 'store'])->middleware('guest');
 
 // 2. Rutas de escritura: crear, editar, eliminar, cambiar estado, salir y cambiar la contraseña.
 // [SEGURIDAD] Ángel agrega ->middleware('auth') en A4
-Route::group([], function () {
+Route::middleware('auth')->group(function () {
     Route::resource('vehiculos', VehiculoController::class)
         ->except(['index', 'show']);
 
