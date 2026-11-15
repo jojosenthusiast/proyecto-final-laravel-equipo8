@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             OrdenServicioSeeder::class,
 
             EscenariosDefensaSeeder::class,
+
+            UsuarioSeeder::class,
         ]);
+
     }
 }

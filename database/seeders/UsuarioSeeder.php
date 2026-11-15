@@ -2,16 +2,23 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UsuarioSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        // [SEGURIDAD] Usuario exclusivo de desarrollo.
+        User::firstOrCreate(
+            [
+                'email' => 'admin@biela.test',
+            ],
+            [
+                'name' => 'Administrador',
+                'password' => Hash::make('Biela2026'),
+            ]
+        );
     }
 }
