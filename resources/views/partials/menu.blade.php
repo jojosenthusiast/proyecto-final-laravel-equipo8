@@ -26,4 +26,28 @@
             @endif
         >Reportes</a>
     @endif
+
+    @guest
+        <a href="{{ route('login') }}">
+            Entrar
+        </a>
+    @endguest
+
+    @auth
+        <span>{{ auth()->user()->name }}</span>
+
+        <a href="{{ route('perfil.contrasena.edit') }}">
+            Cambiar contraseña
+        </a>
+
+        <form method="POST" action="{{ route('logout') }}">
+            {{-- [SEGURIDAD] Protección CSRF --}}
+            @csrf
+
+            <button type="submit" class="boton">
+                Salir
+            </button>
+        </form>
+    @endauth
+
 </nav>
