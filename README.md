@@ -527,8 +527,28 @@ Un selector envía `vehiculo_id` por GET. `HistorialVehiculoRequest` lo valida (
 Se comprueba con `php artisan test --filter=ReporteCsvTest`.
 
 
+### Pruebas de seguridad
 
+Se incorporó el trait `VerificaSeguridad`, ubicado en
+`tests/Concerns/VerificaSeguridad.php`, que permite
+reutilizar comprobaciones de seguridad en las pruebas.
 
+Métodos disponibles:
+
+- `assertFormularioConCsrf()`: verifica la presencia
+  del token CSRF.
+- `assertHtmlEscapado()`: verifica que el contenido HTML
+  se muestra escapado.
+
+Las pruebas comprueban la protección contra XSS,
+inyección SQL, asignación masiva, eliminación mediante
+GET y la presencia de tokens CSRF.
+
+Para ejecutarlas:
+
+```bash
+php artisan test --filter=SeguridadTest
+```
 
 ### Imágenes y catálogo (Fernando)
 
