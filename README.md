@@ -550,6 +550,252 @@ Para ejecutarlas:
 php artisan test --filter=SeguridadTest
 ```
 
+## Instalación y configuración
+
+Biela es un sistema de gestión para un taller mecánico
+desarrollado con Laravel bajo el patrón MVC.
+
+### Requisitos del sistema
+
+- PHP 8.4.
+- Composer 2.
+- MySQL o MariaDB.
+- XAMPP (opcional).
+- Git.
+- Visual Studio Code u otro editor.
+- Extensiones PHP:
+  - pdo_mysql
+  - pdo_sqlite
+  - gd
+  - fileinfo
+  - mbstring
+
+Para comprobar las extensiones instaladas:
+
+    php -m
+
+### Descargar el repositorio
+
+    git clone https://github.com/jojosenthusiast/proyecto-final-laravel-equipo8.git
+    cd proyecto-final-laravel-equipo8
+
+### Instalar las dependencias
+
+    composer install
+
+### Configurar las variables de entorno
+
+Desde Git Bash:
+
+    cp .env.example .env
+
+Desde PowerShell:
+
+    Copy-Item .env.example .env
+
+Generar la clave de la aplicación:
+
+    php artisan key:generate
+
+Iniciar MySQL desde XAMPP o el gestor utilizado.
+
+Crear una base de datos local llamada biela y
+configurar el archivo .env:
+
+    APP_NAME=Biela
+    APP_ENV=local
+    APP_DEBUG=true
+    APP_URL=http://127.0.0.1:8000
+
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=biela
+    DB_USERNAME=root
+    DB_PASSWORD=
+
+Modificar el usuario y la contraseña de la base de
+datos según la configuración de cada computadora.
+
+### Preparar la base de datos
+
+Ejecutar las migraciones y los seeders:
+
+    php artisan migrate:fresh --seed
+
+Advertencia: este comando elimina las tablas existentes
+y vuelve a crearlas. Debe utilizarse únicamente en una
+base de datos local de desarrollo.
+
+Si la extensión pdo_mysql no está habilitada por defecto:
+
+    php -d extension=pdo_mysql artisan migrate:fresh --seed
+
+Crear el enlace simbólico para las imágenes:
+
+    php artisan storage:link
+
+### Ejecutar la aplicación
+
+    php artisan serve
+
+Abrir en el navegador:
+
+http://127.0.0.1:8000
+
+Todo el sistema funciona localmente y no requiere
+servicios de alojamiento ni plataformas de pago.
+
+## Usuario de desarrollo
+
+El usuario de desarrollo se genera mediante
+UsuarioSeeder durante la ejecución de los seeders.
+
+- Correo: admin@biela.test
+- Contraseña: Biela2026
+
+Este usuario es exclusivo del entorno de desarrollo
+y no debe utilizarse en producción.
+
+Los visitantes pueden consultar la información pública
+del sistema sin iniciar sesión.
+
+Las operaciones de creación, edición, actualización,
+eliminación y cambio de estado requieren autenticación.
+
+## Pruebas automatizadas
+
+Para ejecutar todas las pruebas del proyecto:
+
+    php artisan test
+
+Si pdo_sqlite no está habilitado por defecto:
+
+    php -d extension=pdo_sqlite artisan test
+
+### Pruebas de autenticación y seguridad
+
+    php artisan test --filter=AutenticacionTest
+    php artisan test --filter=MenuSesionTest
+    php artisan test --filter=ProteccionRutasTest
+    php artisan test --filter=PaginasErrorTest
+    php artisan test --filter=SeguridadTest
+    php artisan test --filter=CabecerasSeguridadTest
+    php artisan test --filter=CambiarContrasenaTest
+
+Las pruebas utilizan una base de datos de pruebas
+independiente mediante SQLite.
+
+### Integración continua
+
+El proyecto utiliza GitHub Actions para ejecutar
+automáticamente las pruebas cuando se suben cambios.
+
+El archivo de configuración se encuentra en:
+
+    .github/workflows/pruebas.yml
+
+El resultado puede consultarse desde la pestaña
+Actions del repositorio de GitHub.
+
+Si una ejecución falla, se debe identificar la prueba
+que provocó el error, informar al equipo y corregirla
+antes de continuar integrando cambios.
+
+## Seguridad
+
+Durante la Fase 2 se implementaron las siguientes
+medidas de seguridad:
+
+- Autenticación mediante sesiones de Laravel.
+- Inicio y cierre de sesión seguro.
+- Regeneración del identificador de sesión.
+- Protección de rutas mediante middleware auth.
+- Protección CSRF en los formularios.
+- Contraseñas almacenadas mediante hash.
+- Límite de cinco intentos fallidos de autenticación
+  por minuto, identificados por correo electrónico e IP.
+- Escape de contenido HTML mediante Blade.
+- Validación de datos en el servidor.
+- Pruebas contra asignación masiva de identificadores.
+- Pruebas contra inyección SQL en el filtro de marca.
+- Páginas de error 403, 419 y 429 en español.
+- Cambio de contraseña validando la contraseña actual.
+
+### Cabeceras HTTP de seguridad
+
+El middleware CabecerasSeguridad incorpora:
+
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: SAMEORIGIN
+- Referrer-Policy: same-origin
+
+Su ubicación es:
+
+    app/Http/Middleware/CabecerasSeguridad.php
+
+El middleware se registra en el grupo web del
+archivo bootstrap/app.php.
+
+### Utilidades para pruebas de seguridad
+
+El trait VerificaSeguridad se encuentra en:
+
+    tests/Concerns/VerificaSeguridad.php
+
+Contiene los siguientes métodos reutilizables:
+
+- assertFormularioConCsrf(): comprueba que un
+  formulario contiene el token CSRF.
+- assertHtmlEscapado(): comprueba que el contenido
+  HTML se muestra escapado y no como código ejecutable.
+
+Para utilizarlo en otras pruebas:
+
+    use Tests\Concerns\VerificaSeguridad;
+
+Dentro de la clase de prueba:
+
+    use VerificaSeguridad;
+
+## Flujo de trabajo con Git
+
+Cada integrante desarrolla su módulo en una rama
+correspondiente a la funcionalidad asignada.
+
+Antes de comenzar una nueva funcionalidad:
+
+    git fetch origin
+    git switch -c nombre-de-la-rama origin/main
+
+Después de desarrollar la funcionalidad:
+
+    php artisan test
+    git status
+    git add ruta-del-archivo
+    git commit -m "mensaje del commit"
+    git pull --rebase origin main
+    php artisan test
+    git push origin HEAD:main
+
+La rama se publica cuando se completa su último commit:
+
+    git push origin nombre-de-la-rama
+
+### Reglas del equipo
+
+- Utilizar mensajes bajo Conventional Commits.
+- Ejecutar las pruebas antes de subir cambios.
+- No utilizar git push --force sobre main.
+- No subir archivos .env ni credenciales privadas.
+- No subir la carpeta vendor.
+- No modificar archivos asignados a otros integrantes
+  sin autorización.
+- Resolver los conflictos antes de realizar un push.
+- Si main presenta errores, detener temporalmente
+  los pushes hasta que se corrijan.
+
+
 ### Imágenes y catálogo (Fernando)
 
 *Pendiente: Fernando documenta aquí el manejo de imágenes y el catálogo de servicios.*
