@@ -34,7 +34,10 @@ class MenuSesionTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee(route('logout'), false)
+            ->assertSee(
+                'action="' . route('logout') . '"',
+                false
+            )
             ->assertSee('method="POST"', false)
             ->assertSee('name="_token"', false);
     }
