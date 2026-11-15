@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Throwable;
 
 // [ENCAPSULAMIENTO] Única pieza que escribe las fotos de los vehículos en el disco público.
 // [INYECCION-DEPENDENCIAS] Laravel resuelve esta clase automáticamente en los controladores y
@@ -57,5 +59,40 @@ class ImagenVehiculoService
         }
 
         Storage::disk('public')->delete($ruta);
+    }
+
+    /**
+     * Ejecuta una operación que guarda la foto y su registro sin dejar archivos huérfanos.
+     *
+     * Si hay archivo, lo guarda y ejecuta $operacion($rutaNueva) dentro de una transacción.
+     * Si la operación lanza una excepción, borra la foto nueva y relanza el error. Si termina
+     * bien y había una foto anterior, la borra solo en ese momento.
+     *
+     * @template T
+     *
+     * @param  callable(?string): T  $operacion
+     * @return T
+     *
+     * @throws Throwable si la operación falla; la foto nueva se elimina antes de relanzar.
+     */
+    public function conImagen(?UploadedFile $archivo, callable $operacion, ?string $anterior = null): mixed
+    {
+        if ($archivo === null) {
+            return $operacion(null);
+        }
+
+        $rutaNueva = $this->guardar($archivo);
+
+        try {
+            $resultado = DB::transaction(fn () => $operacion($rutaNueva));
+        } catch (Throwable $excepcion) {
+            $this->eliminar($rutaNueva);
+
+            throw $excepcion;
+        }
+
+        $this->eliminar($anterior);
+
+        return $resultado;
     }
 }

@@ -805,8 +805,11 @@ La rama se publica cuando se completa su último commit:
 - `guardar(UploadedFile $archivo): string` guarda la foto en `vehiculos/` y devuelve su ruta relativa.
 - `reemplazar(?string $actual, UploadedFile $nuevo): string` guarda la nueva y después borra la anterior.
 - `eliminar(?string $ruta): void` borra la foto si existe; `null` o un archivo que ya no está no son un error.
+- `conImagen(?UploadedFile $archivo, callable $operacion, ?string $anterior = null): mixed` guarda la foto, ejecuta la operación dentro de `DB::transaction` y, si algo falla, borra la foto nueva y relanza la excepción; si termina bien, borra la anterior. Sin archivo ejecuta la operación con `null`.
 
 La base de datos guarda solo la ruta, nunca el binario. Los archivos viven en `storage/app/public/vehiculos`, que no se sube al repositorio; para que el navegador los vea hay que ejecutar `php artisan storage:link`. Se comprueba con `php artisan test --filter=ImagenVehiculoServiceTest`.
+
+`conImagen()` evita archivos huérfanos: si la fila no se guarda, la foto nueva se elimina; la foto anterior solo se borra cuando el cambio ya quedó guardado.
 
 #### Regla 3: kilometraje
 
