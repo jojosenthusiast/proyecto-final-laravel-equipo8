@@ -798,7 +798,15 @@ La rama se publica cuando se completa su último commit:
 
 ### Imágenes y catálogo (Fernando)
 
-*Pendiente: Fernando documenta aquí el manejo de imágenes y el catálogo de servicios.*
+#### Imágenes de los vehículos
+
+`ImagenVehiculoService` (`app/Services/ImagenVehiculoService.php`) encapsula el manejo de archivos con `Storage::disk('public')` y es la única pieza que escribe en el disco:
+
+- `guardar(UploadedFile $archivo): string` guarda la foto en `vehiculos/` y devuelve su ruta relativa.
+- `reemplazar(?string $actual, UploadedFile $nuevo): string` guarda la nueva y después borra la anterior.
+- `eliminar(?string $ruta): void` borra la foto si existe; `null` o un archivo que ya no está no son un error.
+
+La base de datos guarda solo la ruta, nunca el binario. Los archivos viven en `storage/app/public/vehiculos`, que no se sube al repositorio; para que el navegador los vea hay que ejecutar `php artisan storage:link`. Se comprueba con `php artisan test --filter=ImagenVehiculoServiceTest`.
 
 
 
