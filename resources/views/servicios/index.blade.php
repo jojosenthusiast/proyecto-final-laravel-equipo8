@@ -29,18 +29,31 @@
             <tbody>
                 @foreach ($tiposServicio as $tipo)
                     <tr>
-                        <td>{{ $tipo->nombre }}</td>
+                        <td data-label="Servicio">{{ $tipo->nombre }}</td>
 
-                        <td>{{ $tipo->descripcion }}</td>
+                        <td data-label="Descripción">{{ $tipo->descripcion }}</td>
 
-                        <td>
+                        <td data-label="Precio base">
                             ${{ number_format($tipo->precio_base, 2) }}
                         </td>
 
-                        <td>{{ $tipo->ordenes_count }}</td>
+                        <td data-label="Órdenes">{{ $tipo->ordenes_count }}</td>
 
-                        <td>
+                        <td data-label="Acciones">
                             <a class="boton" href="{{ route('servicios.edit', $tipo) }}">Editar</a>
+
+                            {{-- [SEGURIDAD] La eliminación va por DELETE y pide confirmación. --}}
+                            <form
+                                method="POST"
+                                action="{{ route('servicios.destroy', $tipo) }}"
+                                data-confirmar="¿Eliminar el servicio {{ $tipo->nombre }}?"
+                                onsubmit="return confirm(this.dataset.confirmar)"
+                            >
+                                @csrf
+                                @method('DELETE')
+
+                                <button class="boton boton-peligro" type="submit">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                 @endforeach

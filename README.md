@@ -829,6 +829,8 @@ El catálogo se administra desde `/servicios` con sesión iniciada. `TipoServici
 
 Los mensajes están en español. Se comprueba con `php artisan test --filter=TipoServicioCrudTest`.
 
+La columna «Órdenes» se calcula con `withCount('ordenes')` y cada celda de la tabla lleva `data-label`. El botón Eliminar envía `DELETE` con confirmación; si el servicio ya tiene órdenes, `destroy` no lo borra y devuelve un mensaje de error explicativo, porque la llave foránea es `restrictOnDelete`. Se comprueba con `php artisan test --filter=TipoServicioEliminarTest`.
+
 
 
 

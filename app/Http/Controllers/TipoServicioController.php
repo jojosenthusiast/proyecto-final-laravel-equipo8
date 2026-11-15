@@ -55,8 +55,18 @@ class TipoServicioController extends Controller
             ->with('exito', "Servicio «{$servicio->nombre}» actualizado correctamente.");
     }
 
-    public function destroy(TipoServicio $servicio)
+    public function destroy(TipoServicio $servicio) // [CRUD-DELETE]
     {
-        abort(501, 'Pendiente: F6 (Fernando)');
+        if ($servicio->ordenes()->exists()) {
+            return redirect()
+                ->route('servicios.index')
+                ->with('error', 'No se puede eliminar el servicio porque tiene órdenes registradas.');
+        }
+
+        $servicio->delete();
+
+        return redirect()
+            ->route('servicios.index')
+            ->with('exito', 'Servicio eliminado correctamente.');
     }
 }
