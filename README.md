@@ -811,6 +811,8 @@ La base de datos guarda solo la ruta, nunca el binario. Los archivos viven en `s
 
 `conImagen()` evita archivos huérfanos: si la fila no se guarda, la foto nueva se elimina; la foto anterior solo se borra cuando el cambio ya quedó guardado.
 
+`VehiculoObserver` (`app/Observers/VehiculoObserver.php`) está registrado en `AppServiceProvider` y borra la foto cuando se elimina el vehículo. Así ningún controlador tiene que acordarse de hacerlo. Se comprueba con `php artisan test --filter=VehiculoObserverTest`.
+
 #### Regla 3: kilometraje
 
 `KilometrajeNoMenorAlUltimo` (`app/Rules/KilometrajeNoMenorAlUltimo.php`) es un objeto `Rule` que compara el kilometraje enviado con `Vehiculo::ultimoKilometraje()`. Si el valor es menor, falla con el mensaje «El kilometraje no puede ser menor que el último registrado (N km).». Si el vehículo no existe, la regla no falla y deja el error a `exists:vehiculos,id`. Al editar una orden se pasa su id como segundo argumento para no compararla consigo misma. Se comprueba con `php artisan test --filter=ReglaKilometrajeTest`.
