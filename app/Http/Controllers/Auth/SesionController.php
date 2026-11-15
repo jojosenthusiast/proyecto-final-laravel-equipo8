@@ -16,18 +16,7 @@ class SesionController extends Controller
 
     public function store(LoginRequest $request)
     {
-        $credenciales = $request->only('email', 'password');
-
-        if (!Auth::attempt(
-            $credenciales,
-            $request->boolean('recordar')
-        )) {
-            return back()
-                ->withErrors([
-                    'email' => 'Las credenciales ingresadas son incorrectas.',
-                ])
-                ->withInput($request->only('email'));
-        }
+        $request->autenticar();
 
         $request->session()->regenerate();
 
