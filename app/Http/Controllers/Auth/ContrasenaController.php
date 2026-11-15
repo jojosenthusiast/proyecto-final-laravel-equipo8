@@ -3,18 +3,30 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Auth\CambiarContrasenaRequest;
+use Illuminate\Support\Facades\Hash;
 
-// Esqueleto fijado en C6: Ángel lo completa en A9 (CambiarContrasenaRequest en update).
 class ContrasenaController extends Controller
 {
     public function edit()
     {
-        abort(501, 'Pendiente: A9 (Ángel)');
+        return view('perfil.contrasena');
     }
 
-    public function update(Request $request)
+    public function update(CambiarContrasenaRequest $request)
     {
-        abort(501, 'Pendiente: A9 (Ángel)');
+        // [SEGURIDAD] Almacena la contraseña mediante hash.
+        $request->user()->update([
+            'password' => Hash::make(
+                $request->validated('password')
+            ),
+        ]);
+
+        // [SEGURIDAD] Regenera la sesión.
+        $request->session()->regenerate();
+
+        return redirect()
+            ->route('perfil.contrasena.edit')
+            ->with('exito', 'Contraseña actualizada.');
     }
 }
