@@ -808,6 +808,10 @@ La rama se publica cuando se completa su último commit:
 
 La base de datos guarda solo la ruta, nunca el binario. Los archivos viven en `storage/app/public/vehiculos`, que no se sube al repositorio; para que el navegador los vea hay que ejecutar `php artisan storage:link`. Se comprueba con `php artisan test --filter=ImagenVehiculoServiceTest`.
 
+#### Regla 3: kilometraje
+
+`KilometrajeNoMenorAlUltimo` (`app/Rules/KilometrajeNoMenorAlUltimo.php`) es un objeto `Rule` que compara el kilometraje enviado con `Vehiculo::ultimoKilometraje()`. Si el valor es menor, falla con el mensaje «El kilometraje no puede ser menor que el último registrado (N km).». Si el vehículo no existe, la regla no falla y deja el error a `exists:vehiculos,id`. Al editar una orden se pasa su id como segundo argumento para no compararla consigo misma. Se comprueba con `php artisan test --filter=ReglaKilometrajeTest`.
+
 
 
 
