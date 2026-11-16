@@ -841,6 +841,17 @@ La columna «Órdenes» se calcula con `withCount('ordenes')` y cada celda de la
 
 El catálogo acepta `busqueda`, `orden` y `direccion` por la URL. `TipoServicio::scopeBuscar()` filtra por nombre con un parámetro enlazado. `TipoServicioController@index` solo permite ordenar por `nombre`, `precio_base` u `ordenes_count`; cualquier otra columna cae en `nombre`, y la dirección solo puede ser `asc` o `desc`. La lista se pagina de 10 en 10 con `withQueryString()`, así que los enlaces conservan la búsqueda y el orden. Se comprueba con `php artisan test --filter=TipoServicioBusquedaTest`.
 
+#### Comando de fotos huérfanas
+
+`php artisan biela:imagenes-huerfanas` lista las fotos de `storage/app/public/vehiculos` que no pertenecen a ningún vehículo. Sin opciones solo avisa; con `--eliminar` borra esos archivos y deja intactas las fotos en uso. Se comprueba con `php artisan test --filter=ImagenesHuerfanasCommandTest`.
+
+#### Comprobación rápida de mi bloque
+
+```sh
+php artisan storage:link
+php artisan test --filter='ImagenVehiculoServiceTest|ReglaKilometrajeTest|VehiculoObserverTest|TipoServicioCrudTest|TipoServicioEliminarTest|TipoServicioValidacionHttpTest|TipoServicioFichaTest|TipoServicioBusquedaTest|ImagenesHuerfanasCommandTest'
+```
+
 
 
 
