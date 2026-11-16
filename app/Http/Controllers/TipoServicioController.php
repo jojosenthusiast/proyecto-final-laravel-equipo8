@@ -22,9 +22,22 @@ class TipoServicioController extends Controller
 
     // Esqueletos fijados en C6: las firmas son contrato. Fernando reemplaza cada abort(501) en su
     // commit y puede cambiar Request por su Form Request sin cambiar el nombre del método.
-    public function show(TipoServicio $servicio)
+    public function show(TipoServicio $servicio) // [CRUD-READ]
     {
-        abort(501, 'Pendiente: F8 (Fernando)');
+        $servicio->loadCount('ordenes')
+            ->loadSum(
+                ['ordenes as ingresos' => fn ($consulta) => $consulta->estado('finalizada')],
+                'costo_total'
+            );
+
+        $ordenes = $servicio->ordenes()
+            ->with('vehiculo')
+            ->orderByDesc('fecha_ingreso')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get();
+
+        return view('servicios.show', compact('servicio', 'ordenes'));
     }
 
     public function create() // [CRUD-CREATE]

@@ -833,6 +833,10 @@ La columna «Órdenes» se calcula con `withCount('ordenes')` y cada celda de la
 
 `TipoServicioValidacionHttpTest` simula un navegador con `novalidate` y envía diez casos inválidos por HTTP: nombre vacío o en blanco, nombre de 61 caracteres, nombre duplicado, precio vacío, cero, negativo, con letras o demasiado alto, y descripción de 256 caracteres. Cada caso comprueba el mensaje en español y que los datos válidos se conservan con `old()`. Se ejecuta con `php artisan test --filter=TipoServicioValidacionHttpTest`.
 
+#### Ficha del servicio
+
+`GET /servicios/{servicio}` es pública. `TipoServicioController@show` carga con `loadCount('ordenes')` el total de órdenes y con `loadSum()` los ingresos de las órdenes finalizadas (usando `scopeEstado('finalizada')`), y trae las 10 órdenes más recientes con su vehículo ya cargado. La vista `servicios/show.blade.php` muestra descripción, precio base, total de órdenes, ingresos, el historial reciente con enlaces a `ordenes.show` y `vehiculos.show`, y un estado vacío cuando no hay órdenes. Se comprueba con `php artisan test --filter=TipoServicioFichaTest`.
+
 
 
 
