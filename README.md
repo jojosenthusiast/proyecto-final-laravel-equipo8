@@ -858,6 +858,28 @@ php artisan test --filter='ImagenVehiculoServiceTest|ReglaKilometrajeTest|Vehicu
 
 ### Vehículos (Jorge)
 
+Este es el CRUD completo de la entidad principal. Cualquiera puede ver el listado y la ficha. Registrar, editar y eliminar requieren sesión iniciada.
+
+| Página | Ruta | Qué hace |
+| --- | --- | --- |
+| Listado | `GET /vehiculos` | Búsqueda por placa, propietario o modelo; filtro por marca; orden por placa, año o kilometraje; paginación de 10 en 10 que conserva los filtros. |
+| Ficha | `GET /vehiculos/{vehiculo}` | Datos, foto, indicadores e historial de órdenes; enlaces a registrar orden, editar y eliminar. |
+| Registro | `GET /vehiculos/create`, `POST /vehiculos` | Formulario con foto opcional (`StoreVehiculoRequest`). |
+| Edición | `GET /vehiculos/{vehiculo}/edit`, `PUT /vehiculos/{vehiculo}` | Datos precargados, reemplazo seguro de la foto y regla 3 en el kilometraje (`UpdateVehiculoRequest`). |
+| Eliminación | `DELETE /vehiculos/{vehiculo}` | Con confirmación; si el vehículo tiene órdenes, muestra un mensaje en lugar de un error 500. |
+
+Las reglas del caso que viven en este módulo:
+
+- **Regla 1:** placa única con formato `P123456`.
+- **Regla 2:** año entre 1980 y el año actual + 1.
+- **Regla 3:** en la edición, el kilometraje no baja del último registrado.
+
+Archivos del módulo: `VehiculoController`, `StoreVehiculoRequest`, `UpdateVehiculoRequest`, `resources/views/vehiculos/*` y `Vehiculo::scopeBuscar()`. Todas sus pruebas se corren con:
+
+```bash
+php artisan test --filter='Vehiculo(Reglas|Busqueda|Ficha|Registro|Edicion|Eliminacion|ValidacionHttp)Test|ImagenesCicloTest'
+```
+
 #### Validación del vehículo (reglas 1 y 2)
 
 El registro usa `StoreVehiculoRequest` y la edición usa `UpdateVehiculoRequest`, que hereda las mismas reglas y solo cambia la de placa única. Antes de validar, la placa se pasa a mayúsculas y se le quitan los espacios: «p123456 » se guarda como «P123456».
@@ -996,6 +1018,23 @@ Además:
 - Un campo enviado como arreglo (`marca[]=x`) se rechaza con un mensaje, no con un error 500.
 
 Se comprueba con `php artisan test --filter=VehiculoValidacionHttpTest --testdox`, que imprime cada caso con su nombre.
+
+#### Ciclo de la foto (criterio 5)
+
+`ImagenesCicloTest` recorre por HTTP todo el ciclo de la foto de un vehículo. Cada prueba empieza con el punto de la rúbrica que cubre:
+
+| Punto | Qué se comprueba |
+| --- | --- |
+| Tipo | Se aceptan JPG, PNG y WEBP. Un PDF se rechaza con «El archivo debe ser una imagen.», también si se renombra como `foto.png`: Laravel detecta el tipo por el contenido del archivo, no por su extensión. |
+| Tamaño | Una foto de 3 MB se rechaza con «La imagen no puede pesar más de 2 MB.». Una de 2 MB exactos se acepta (`max:2048`, en KB). |
+| Almacenamiento | La foto se guarda en el disco `public`, dentro de `vehiculos/`, con un nombre aleatorio de 40 caracteres. No se usa el nombre que trae del cliente. En la base de datos solo queda la ruta. |
+| Reemplazo | Subir otra foto en la edición borra la anterior. Editar sin elegir foto conserva la actual. |
+| Eliminación | Borrar el vehículo borra su foto, a través del observer. |
+| Por defecto | Sin foto, la ficha y el listado muestran `img/vehiculo-default.svg`. |
+| URL pública | La ficha, el listado y la edición usan `asset('storage/...')`. Esa URL funciona gracias a `php artisan storage:link`, que crea `public/storage` apuntando a `storage/app/public`, la raíz del disco `public` (ver la sección de instalación). Sin el enlace, la foto daría 404 en el navegador. |
+| Ciclo completo | Registrar con foto, reemplazarla dos veces, editar sin foto y eliminar el vehículo no deja ningún archivo huérfano. |
+
+Las fotos JPG y WEBP de la prueba son imágenes reales de 1×1 px escritas en bytes, y se suben como lo haría el navegador. Así la prueba no depende de que la instalación de PHP sepa generar esos formatos con GD, y el tipo se detecta por el contenido. Se comprueba con `php artisan test --filter=ImagenesCicloTest --testdox`.
 
 
 
