@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\TipoServicioFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +29,15 @@ class TipoServicio extends Model
         return [
             'precio_base' => 'decimal:2',
         ];
+    }
+
+    // [ENCAPSULAMIENTO] Búsqueda por nombre con un parámetro enlazado, nunca concatenado en SQL.
+    public function scopeBuscar(Builder $query, ?string $texto): Builder
+    {
+        return $query->when(
+            $texto !== null && trim($texto) !== '',
+            fn (Builder $consulta) => $consulta->where('nombre', 'like', '%'.trim($texto).'%')
+        );
     }
 
     // [RELACION] Un tipo de servicio tiene muchas órdenes de servicio.

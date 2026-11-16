@@ -837,6 +837,10 @@ La columna «Órdenes» se calcula con `withCount('ordenes')` y cada celda de la
 
 `GET /servicios/{servicio}` es pública. `TipoServicioController@show` carga con `loadCount('ordenes')` el total de órdenes y con `loadSum()` los ingresos de las órdenes finalizadas (usando `scopeEstado('finalizada')`), y trae las 10 órdenes más recientes con su vehículo ya cargado. La vista `servicios/show.blade.php` muestra descripción, precio base, total de órdenes, ingresos, el historial reciente con enlaces a `ordenes.show` y `vehiculos.show`, y un estado vacío cuando no hay órdenes. Se comprueba con `php artisan test --filter=TipoServicioFichaTest`.
 
+#### Búsqueda y orden
+
+El catálogo acepta `busqueda`, `orden` y `direccion` por la URL. `TipoServicio::scopeBuscar()` filtra por nombre con un parámetro enlazado. `TipoServicioController@index` solo permite ordenar por `nombre`, `precio_base` u `ordenes_count`; cualquier otra columna cae en `nombre`, y la dirección solo puede ser `asc` o `desc`. La lista se pagina de 10 en 10 con `withQueryString()`, así que los enlaces conservan la búsqueda y el orden. Se comprueba con `php artisan test --filter=TipoServicioBusquedaTest`.
+
 
 
 

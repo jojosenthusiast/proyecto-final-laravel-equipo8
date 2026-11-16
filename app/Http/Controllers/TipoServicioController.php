@@ -5,19 +5,34 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTipoServicioRequest;
 use App\Http\Requests\UpdateTipoServicioRequest;
 use App\Models\TipoServicio;
+use Illuminate\Http\Request;
 
 class TipoServicioController extends Controller
 {
     /**
-     * Muestra los servicios disponibles del taller.
+     * Muestra los servicios disponibles del taller, con búsqueda y orden.
      */
-    public function index() // [CRUD-READ]
+    public function index(Request $request) // [CRUD-READ]
     {
-        $tiposServicio = TipoServicio::withCount('ordenes')
-            ->orderBy('nombre')
-            ->get();
+        // [SEGURIDAD] Solo se ordena por columnas permitidas y con dirección asc/desc; cualquier
+        // otro valor cae en el orden por nombre.
+        $orden = $request->query('orden');
+        $orden = in_array($orden, ['nombre', 'precio_base', 'ordenes_count'], true)
+            ? $orden
+            : 'nombre';
 
-        return view('servicios.index', compact('tiposServicio'));
+        $direccion = $request->query('direccion') === 'desc' ? 'desc' : 'asc';
+
+        $busqueda = $request->query('busqueda');
+        $busqueda = is_string($busqueda) ? trim($busqueda) : null;
+
+        $tiposServicio = TipoServicio::withCount('ordenes')
+            ->buscar($busqueda)
+            ->orderBy($orden, $direccion)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('servicios.index', compact('tiposServicio', 'orden', 'direccion'));
     }
 
     // Esqueletos fijados en C6: las firmas son contrato. Fernando reemplaza cada abort(501) en su
