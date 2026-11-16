@@ -6,6 +6,7 @@ use App\Http\Requests\StoreVehiculoRequest;
 use App\Http\Requests\UpdateVehiculoRequest;
 use App\Models\Vehiculo;
 use App\Services\ImagenVehiculoService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -88,8 +89,6 @@ class VehiculoController extends Controller
         ]);
     }
 
-    // Esqueletos fijados en C6: las firmas son contrato. Jorge reemplaza cada abort(501) en su
-    // commit y puede cambiar Request por su Form Request sin cambiar el nombre del método.
     // [CRUD-CREATE] Formulario de registro. La ruta está protegida con auth: sin sesión, Laravel
     // redirige al inicio de sesión antes de llegar aquí.
     public function create()
@@ -149,8 +148,39 @@ class VehiculoController extends Controller
         return Arr::except($request->validated(), 'imagen');
     }
 
+    // [CRUD-DELETE] Elimina el vehículo. Solo llega por DELETE (formulario con @method('DELETE')
+    // y @csrf): un enlace o una visita por GET a la misma URL abre la ficha y no borra nada.
     public function destroy(Vehiculo $vehiculo)
     {
-        abort(501, 'Pendiente: J6 (Jorge)');
+        // [REGLA-NEGOCIO] La llave foránea de ordenes_servicio usa restrictOnDelete: un vehículo
+        // con órdenes no se puede borrar sin perder su historial. Se revisa antes para responder
+        // con un mensaje claro en lugar de dejar que la base lance un error 500.
+        $cantidad = $vehiculo->ordenes()->count();
+
+        if ($cantidad > 0) {
+            return $this->noSePuedeEliminar($vehiculo, $cantidad);
+        }
+
+        // Si alguien registra una orden justo entre la revisión y el borrado, la base rechaza el
+        // DELETE por la llave foránea; se responde con el mismo mensaje y sin error 500.
+        try {
+            // La foto no se borra aquí: el observer de Vehiculo (F4) la elimina después del borrado.
+            $vehiculo->delete();
+        } catch (QueryException) {
+            return $this->noSePuedeEliminar($vehiculo, $vehiculo->ordenes()->count());
+        }
+
+        // Siempre al listado: la ficha del vehículo borrado ya no existe.
+        return redirect()->route('vehiculos.index')
+            ->with('exito', 'Vehículo eliminado correctamente.');
+    }
+
+    // Regresa a la página desde donde se pidió el borrado (listado o ficha) con el motivo.
+    private function noSePuedeEliminar(Vehiculo $vehiculo, int $cantidad)
+    {
+        $ordenes = $cantidad === 1 ? '1 orden registrada' : "{$cantidad} órdenes registradas";
+
+        return redirect()->back(fallback: route('vehiculos.show', $vehiculo))
+            ->with('error', "No se puede eliminar: el vehículo tiene {$ordenes}.");
     }
 }

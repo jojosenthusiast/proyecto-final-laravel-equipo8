@@ -94,6 +94,19 @@
 
                         <td data-label="Acciones">
                             <a class="boton" href="{{ route('vehiculos.show', $vehiculo) }}">Ver ficha</a>
+
+                            {{-- [SEGURIDAD] Borrar va por POST con @csrf y @method('DELETE'), nunca
+                                 por un enlace GET. data-confirmar lo usa biela.js (Milton); onsubmit
+                                 pide la confirmación aunque el script no cargue. --}}
+                            @auth
+                                <form method="POST" action="{{ route('vehiculos.destroy', $vehiculo) }}"
+                                      data-confirmar="¿Eliminar el vehículo {{ $vehiculo->placa }}?"
+                                      onsubmit="return confirm(this.dataset.confirmar)">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="boton boton-peligro">Eliminar</button>
+                                </form>
+                            @endauth
                         </td>
                     </tr>
                 @endforeach

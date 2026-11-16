@@ -940,6 +940,18 @@ Con sesión iniciada, el botón «Editar» de la ficha lleva a `/vehiculos/{vehi
 
 Se comprueba con `php artisan test --filter=VehiculoEdicionTest`. Para simular una falla de la base de datos al guardar, las pruebas lanzan una excepción en el evento `updating` (o `creating`) del modelo.
 
+#### Eliminación con confirmación
+
+Con sesión iniciada, el listado y la ficha muestran el botón «Eliminar». Sigue el contrato de marcado: un formulario `POST` con `@csrf` y `@method('DELETE')`, más `data-confirmar="¿Eliminar el vehículo P123456?"`. El `onsubmit="return confirm(...)"` pide la confirmación aunque `biela.js` no cargue.
+
+- **Solo por DELETE:** la URL de borrado es la misma de la ficha. Un enlace o una visita por GET solo muestra el vehículo, y un POST sin `_method=DELETE` responde 405. Sin sesión, redirige al inicio de sesión.
+- **Vehículo con órdenes:** la llave foránea de `ordenes_servicio` usa `restrictOnDelete`, para que el taller no pierda el historial. Antes de borrar, `destroy()` cuenta las órdenes y, si hay alguna, regresa a la página de origen con «No se puede eliminar: el vehículo tiene 2 órdenes registradas.» (o «1 orden registrada»). No se llega a intentar el `DELETE`, así que no hay error 500.
+- **Red de seguridad:** si alguien registra una orden justo entre la revisión y el borrado, la base rechaza el `DELETE` con una `QueryException`. El controlador la atrapa y responde con el mismo mensaje.
+- **Foto:** el controlador no borra el archivo. Lo hace el observer de `Vehiculo` (`VehiculoObserver::deleted`) cuando el borrado ya sucedió. Si el borrado no sucede, la foto se queda.
+- **Resultado:** redirige siempre al listado con «Vehículo eliminado correctamente.», porque la ficha del vehículo borrado ya no existe.
+
+Se comprueba con `php artisan test --filter=VehiculoEliminacionTest`.
+
 
 
 
