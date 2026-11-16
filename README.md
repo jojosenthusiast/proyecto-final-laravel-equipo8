@@ -831,6 +831,8 @@ Los mensajes están en español. Se comprueba con `php artisan test --filter=Tip
 
 La columna «Órdenes» se calcula con `withCount('ordenes')` y cada celda de la tabla lleva `data-label`. El botón Eliminar envía `DELETE` con confirmación; si el servicio ya tiene órdenes, `destroy` no lo borra y devuelve un mensaje de error explicativo, porque la llave foránea es `restrictOnDelete`. Se comprueba con `php artisan test --filter=TipoServicioEliminarTest`.
 
+`TipoServicioValidacionHttpTest` simula un navegador con `novalidate` y envía diez casos inválidos por HTTP: nombre vacío o en blanco, nombre de 61 caracteres, nombre duplicado, precio vacío, cero, negativo, con letras o demasiado alto, y descripción de 256 caracteres. Cada caso comprueba el mensaje en español y que los datos válidos se conservan con `old()`. Se ejecuta con `php artisan test --filter=TipoServicioValidacionHttpTest`.
+
 
 
 
