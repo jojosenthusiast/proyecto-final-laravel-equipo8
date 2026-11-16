@@ -59,7 +59,9 @@
             <tbody>
                 @foreach ($tiposServicio as $tipo)
                     <tr>
-                        <td data-label="Servicio">{{ $tipo->nombre }}</td>
+                        <td data-label="Servicio">
+                            <a href="{{ route('servicios.show', $tipo) }}">{{ $tipo->nombre }}</a>
+                        </td>
 
                         <td data-label="Descripción">{{ $tipo->descripcion }}</td>
 

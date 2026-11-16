@@ -74,4 +74,13 @@ class TipoServicioFichaTest extends TestCase
                     && $ordenes->first()->fecha_ingreso->format('Y-m-d') === '2026-01-12';
             });
     }
+
+    public function test_el_listado_enlaza_el_nombre_del_servicio_con_su_ficha(): void
+    {
+        $servicio = TipoServicio::factory()->create(['nombre' => 'Frenos']);
+
+        $this->get(route('servicios.index'))
+            ->assertOk()
+            ->assertSee(route('servicios.show', $servicio), false);
+    }
 }
