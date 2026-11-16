@@ -964,6 +964,39 @@ La regla 3 del caso dice que el kilometraje nunca baja del último registrado. A
 
 Se comprueba con `php artisan test --filter=VehiculoEdicionTest`.
 
+#### Batería de validación con novalidate (guion de la defensa)
+
+`VehiculoValidacionHttpTest` simula el formulario de registro con `novalidate`: el navegador no frena nada (ni `required`, ni `min`, ni `accept`), y cada dato incorrecto llega al servidor por `POST /vehiculos`. En cada caso se cambia un solo campo de un registro válido y se comprueba:
+
+- que se regresa al formulario con el mensaje en español;
+- que el único error es el de ese campo;
+- que no se guardó ni la fila ni el archivo.
+
+| Campo | Lo que se envía | Mensaje |
+| --- | --- | --- |
+| Placa | vacía | El campo placa es obligatorio. |
+| Placa | `ABC123`, `P12345`, `P1234567`, `P 123456` | La placa debe tener el formato P123456. |
+| Placa | `P000777` ya registrada (también como ` p000777 `) | Ya hay un vehículo registrado con esa placa. |
+| Año | `1979`, año actual + 2 | El año debe estar entre 1980 y 2027. (en 2026) |
+| Año | `dos mil`, `2020.5` | El campo año debe ser un número entero. |
+| Kilometraje | `-1` | El kilometraje no puede ser negativo. |
+| Kilometraje | `mucho` | El campo kilometraje debe ser un número entero. |
+| Kilometraje | `1000000` | El kilometraje no puede ser mayor que 999 999 km. |
+| Teléfono | `70001234`, `7000-ABCD` | El teléfono debe tener el formato 0000-0000. |
+| Teléfono, marca, propietario | vacíos | El campo … es obligatorio. |
+| Modelo, color, propietario | 51, 31 y 101 caracteres | … no puede tener más de 50 / 30 / 100 caracteres. |
+| Imagen | un PDF | El archivo debe ser una imagen. |
+| Imagen | un PNG de 3 MB | La imagen no puede pesar más de 2 MB. |
+| Imagen | un GIF | La imagen debe ser JPG, PNG o WEBP. |
+
+Además:
+
+- Los límites exactos (año 1980 y año actual + 1, kilometraje 0 y 999 999) sí se aceptan.
+- Con varios errores a la vez, `old()` conserva todo lo escrito (`assertSessionHasInput`).
+- Un campo enviado como arreglo (`marca[]=x`) se rechaza con un mensaje, no con un error 500.
+
+Se comprueba con `php artisan test --filter=VehiculoValidacionHttpTest --testdox`, que imprime cada caso con su nombre.
+
 
 
 
