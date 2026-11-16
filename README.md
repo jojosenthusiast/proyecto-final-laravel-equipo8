@@ -952,6 +952,18 @@ Con sesión iniciada, el listado y la ficha muestran el botón «Eliminar». Sig
 
 Se comprueba con `php artisan test --filter=VehiculoEliminacionTest`.
 
+#### Kilometraje en la edición (regla 3)
+
+La regla 3 del caso dice que el kilometraje nunca baja del último registrado. Además de aplicarse a las órdenes, también se aplica al editar el vehículo. `UpdateVehiculoRequest` agrega la regla `KilometrajeNoMenorAlUltimo` (de Fernando, F2) a `required`, `integer`, `min:0` y `max:999999` del registro.
+
+- El «último registrado» lo calcula `Vehiculo::ultimoKilometraje()`: es el mayor entre el kilometraje del vehículo y el de sus órdenes. Si una orden registró 85 000 km, el vehículo no se puede editar a 80 000. Sale «El kilometraje no puede ser menor que el último registrado (85000 km).» junto al campo, y el valor escrito se conserva.
+- Igualar o subir el kilometraje funciona.
+- Un vehículo sin órdenes acepta cualquier valor mayor o igual al que ya tiene, pero no uno menor.
+- Solo cuentan las órdenes del propio vehículo.
+- El registro no aplica esta regla: un vehículo nuevo no tiene historial.
+
+Se comprueba con `php artisan test --filter=VehiculoEdicionTest`.
+
 
 
 

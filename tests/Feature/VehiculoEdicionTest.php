@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\OrdenServicio;
 use App\Models\Vehiculo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -163,6 +164,78 @@ class VehiculoEdicionTest extends TestCase
             ->assertOk()
             ->assertSee('Vehículo actualizado correctamente.')
             ->assertSee('CX-30');
+    }
+
+    // Regla 3 en la edición. El vehículo de prueba tiene 30 000 km registrados.
+    private function crearOrden(int $kilometraje, ?Vehiculo $vehiculo = null): OrdenServicio
+    {
+        return OrdenServicio::factory()->create([
+            'vehiculo_id' => ($vehiculo ?? $this->vehiculo)->id,
+            'kilometraje_ingreso' => $kilometraje,
+        ]);
+    }
+
+    public function test_no_se_puede_bajar_el_kilometraje_por_debajo_de_una_orden(): void
+    {
+        $this->crearOrden(85000);
+
+        $this->actualizar(['kilometraje' => 80000])
+            ->assertRedirect(route('vehiculos.edit', $this->vehiculo))
+            ->assertSessionHasErrors(['kilometraje' => 'El kilometraje no puede ser menor que el último registrado (85000 km).']);
+
+        $this->assertSame(30000, $this->vehiculo->fresh()->kilometraje);
+    }
+
+    public function test_el_error_del_kilometraje_se_ve_junto_a_su_campo(): void
+    {
+        $this->crearOrden(85000);
+
+        $this->iniciarSesion()->from(route('vehiculos.edit', $this->vehiculo))->followingRedirects()
+            ->put(route('vehiculos.update', $this->vehiculo), $this->datos(['kilometraje' => 80000]))
+            ->assertOk()
+            ->assertSee('aria-describedby="kilometraje-error"', false)
+            ->assertSee('El kilometraje no puede ser menor que el último registrado (85000 km).')
+            ->assertSee('value="80000"', false);
+    }
+
+    public function test_igualar_o_subir_el_kilometraje_de_la_ultima_orden_funciona(): void
+    {
+        $this->crearOrden(85000);
+
+        $this->actualizar(['kilometraje' => 85000])->assertSessionHasNoErrors();
+        $this->assertSame(85000, $this->vehiculo->fresh()->kilometraje);
+
+        $this->actualizar(['kilometraje' => 92000])->assertSessionHasNoErrors();
+        $this->assertSame(92000, $this->vehiculo->fresh()->kilometraje);
+    }
+
+    public function test_sin_ordenes_acepta_un_valor_mayor_o_igual_al_actual_y_rechaza_uno_menor(): void
+    {
+        $this->actualizar(['kilometraje' => 30000])->assertSessionHasNoErrors();
+        $this->actualizar(['kilometraje' => 30500])->assertSessionHasNoErrors();
+        $this->assertSame(30500, $this->vehiculo->fresh()->kilometraje);
+
+        $this->actualizar(['kilometraje' => 29999])
+            ->assertSessionHasErrors(['kilometraje' => 'El kilometraje no puede ser menor que el último registrado (30500 km).']);
+        $this->assertSame(30500, $this->vehiculo->fresh()->kilometraje);
+    }
+
+    public function test_las_ordenes_de_otro_vehiculo_no_cuentan(): void
+    {
+        $this->crearOrden(150000, Vehiculo::factory()->create());
+
+        $this->actualizar(['kilometraje' => 40000])->assertSessionHasNoErrors();
+
+        $this->assertSame(40000, $this->vehiculo->fresh()->kilometraje);
+    }
+
+    public function test_el_registro_no_aplica_la_regla_del_kilometraje(): void
+    {
+        // Un vehículo nuevo no tiene historial: cualquier kilometraje de 0 a 999 999 es válido.
+        $this->iniciarSesion()->post(route('vehiculos.store'), $this->datos(['placa' => 'P810010', 'kilometraje' => 0]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('vehiculos', ['placa' => 'P810010', 'kilometraje' => 0]);
     }
 
     public function test_sin_sesion_no_se_puede_editar(): void
