@@ -94,6 +94,9 @@
     <label for="imagen">Foto del vehículo (opcional)</label>
     <img id="vista-imagen" src="{{ $vehiculo->imagen_url ?? asset('img/vehiculo-default.svg') }}"
          alt="Foto del vehículo" width="160">
+    @isset($vehiculo)
+        <p>Si no eliges otra foto, se conserva la actual.</p>
+    @endisset
     <input type="file" id="imagen" name="imagen" accept=".jpg,.jpeg,.png,.webp"
            data-vista-previa="vista-imagen"
            @error('imagen') aria-invalid="true" aria-describedby="imagen-error" @enderror>

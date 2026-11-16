@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVehiculoRequest;
+use App\Http\Requests\UpdateVehiculoRequest;
 use App\Models\Vehiculo;
 use App\Services\ImagenVehiculoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class VehiculoController extends Controller
 {
@@ -100,27 +102,51 @@ class VehiculoController extends Controller
     // [INYECCION-DEPENDENCIAS] Laravel crea el ImagenVehiculoService y lo pasa como parámetro.
     public function store(StoreVehiculoRequest $request, ImagenVehiculoService $imagenes)
     {
-        $datos = $request->validated();
+        $datos = $this->datosSinImagen($request);
 
+        // conImagen() guarda la foto (si llegó) y crea el vehículo en una transacción. Si el
+        // insert falla, borra la foto recién subida: no queda un archivo sin vehículo.
         // La base de datos guarda solo la ruta de la foto («vehiculos/abc123.png»), no el archivo.
-        if ($request->hasFile('imagen')) {
-            $datos['imagen'] = $imagenes->guardar($request->file('imagen'));
-        }
-
-        $vehiculo = Vehiculo::create($datos);
+        $vehiculo = $imagenes->conImagen(
+            $request->file('imagen'),
+            fn (?string $ruta) => Vehiculo::create($ruta ? [...$datos, 'imagen' => $ruta] : $datos),
+        );
 
         return redirect()->route('vehiculos.show', $vehiculo)
             ->with('exito', 'Vehículo registrado correctamente.');
     }
 
+    // [CRUD-UPDATE] Formulario de edición con los datos actuales y la foto actual (imagen_url).
     public function edit(Vehiculo $vehiculo)
     {
-        abort(501, 'Pendiente: J5 (Jorge)');
+        return view('vehiculos.edit', ['vehiculo' => $vehiculo]);
     }
 
-    public function update(Request $request, Vehiculo $vehiculo)
+    // [CRUD-UPDATE] Guarda los cambios. UpdateVehiculoRequest valida con la placa única que ignora
+    // al propio vehículo, así guardar sin cambiar la placa no da «placa repetida».
+    public function update(UpdateVehiculoRequest $request, Vehiculo $vehiculo, ImagenVehiculoService $imagenes)
     {
-        abort(501, 'Pendiente: J5 (Jorge)');
+        $datos = $this->datosSinImagen($request);
+
+        // Reemplazo seguro de la foto: conImagen() guarda la nueva, actualiza la fila en una
+        // transacción y solo entonces borra la anterior. Si la actualización falla, borra la
+        // nueva y la anterior sigue intacta. Sin archivo nuevo no se borra nada.
+        $imagenes->conImagen(
+            $request->file('imagen'),
+            fn (?string $ruta) => $vehiculo->update($ruta ? [...$datos, 'imagen' => $ruta] : $datos),
+            $request->hasFile('imagen') ? $vehiculo->imagen : null,
+        );
+
+        return redirect()->route('vehiculos.show', $vehiculo)
+            ->with('exito', 'Vehículo actualizado correctamente.');
+    }
+
+    // Los datos validados sin la clave 'imagen': ahí llega el archivo subido (o null si el campo
+    // vino vacío), no la ruta. Si quedara, editar sin elegir foto borraría la ruta guardada.
+    // La ruta solo se agrega cuando conImagen() ya guardó un archivo nuevo.
+    private function datosSinImagen(StoreVehiculoRequest $request): array
+    {
+        return Arr::except($request->validated(), 'imagen');
     }
 
     public function destroy(Vehiculo $vehiculo)

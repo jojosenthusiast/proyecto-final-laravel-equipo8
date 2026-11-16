@@ -923,6 +923,23 @@ Con sesión iniciada, el listado muestra el botón «Registrar vehículo», que 
 
 Se comprueba con `php artisan test --filter=VehiculoRegistroTest`. Las fotos de prueba son PNG porque algunas instalaciones de PHP traen GD sin soporte para JPEG, y `UploadedFile::fake()->image()` necesita GD para dibujarlas.
 
+#### Edición con reemplazo seguro de la foto
+
+Con sesión iniciada, el botón «Editar» de la ficha lleva a `/vehiculos/{vehiculo}/edit`. El formulario es el mismo parcial del registro, con los datos actuales precargados (`old('placa', $vehiculo->placa)`) y la foto actual visible (`$vehiculo->imagen_url`). Como los formularios HTML solo envían GET o POST, `@method('PUT')` agrega el campo `_method` para que la petición llegue a `vehiculos.update`.
+
+- **Placa única:** `UpdateVehiculoRequest` usa `Rule::unique()->ignore()` sobre el propio vehículo. Guardar sin cambiar la placa no da error, pero usar la placa de otro vehículo sí: «Ya hay un vehículo registrado con esa placa.».
+- **Sin foto nueva:** el campo `imagen` se quita de los datos validados antes de guardar. Si no se quitara, el campo vacío pisaría la ruta guardada con `null` y el vehículo perdería su foto.
+- **Con foto nueva:** `ImagenVehiculoService::conImagen()` hace el reemplazo en este orden:
+  1. Guarda la foto nueva.
+  2. Actualiza la fila dentro de una transacción.
+  3. Solo si eso salió bien, borra la foto anterior.
+
+  Si la actualización falla, borra la foto nueva y la anterior sigue en el disco y en la fila. Así nunca queda un archivo sin dueño ni un vehículo apuntando a una foto borrada.
+- **Registro:** `store()` también usa `conImagen()`. Si el insert falla, la foto recién subida se borra.
+- **Resultado:** redirige a la ficha con el mensaje «Vehículo actualizado correctamente.».
+
+Se comprueba con `php artisan test --filter=VehiculoEdicionTest`. Para simular una falla de la base de datos al guardar, las pruebas lanzan una excepción en el evento `updating` (o `creating`) del modelo.
+
 
 
 
