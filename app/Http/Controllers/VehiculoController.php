@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreVehiculoRequest;
 use App\Models\Vehiculo;
+use App\Services\ImagenVehiculoService;
 use Illuminate\Http\Request;
 
 class VehiculoController extends Controller
@@ -86,14 +88,29 @@ class VehiculoController extends Controller
 
     // Esqueletos fijados en C6: las firmas son contrato. Jorge reemplaza cada abort(501) en su
     // commit y puede cambiar Request por su Form Request sin cambiar el nombre del método.
+    // [CRUD-CREATE] Formulario de registro. La ruta está protegida con auth: sin sesión, Laravel
+    // redirige al inicio de sesión antes de llegar aquí.
     public function create()
     {
-        abort(501, 'Pendiente: J4 (Jorge)');
+        return view('vehiculos.create');
     }
 
-    public function store(Request $request)
+    // [CRUD-CREATE] Registra el vehículo. StoreVehiculoRequest valida antes de entrar al método:
+    // si algo falla, Laravel regresa al formulario con los errores y old() con lo escrito.
+    // [INYECCION-DEPENDENCIAS] Laravel crea el ImagenVehiculoService y lo pasa como parámetro.
+    public function store(StoreVehiculoRequest $request, ImagenVehiculoService $imagenes)
     {
-        abort(501, 'Pendiente: J4 (Jorge)');
+        $datos = $request->validated();
+
+        // La base de datos guarda solo la ruta de la foto («vehiculos/abc123.png»), no el archivo.
+        if ($request->hasFile('imagen')) {
+            $datos['imagen'] = $imagenes->guardar($request->file('imagen'));
+        }
+
+        $vehiculo = Vehiculo::create($datos);
+
+        return redirect()->route('vehiculos.show', $vehiculo)
+            ->with('exito', 'Vehículo registrado correctamente.');
     }
 
     public function edit(Vehiculo $vehiculo)

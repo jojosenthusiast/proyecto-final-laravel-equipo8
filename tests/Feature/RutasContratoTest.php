@@ -82,7 +82,7 @@ class RutasContratoTest extends TestCase
     public function test_crear_vehiculo_no_cae_en_la_ficha_y_no_responde_404(): void
     {
         // Si vehiculos/{vehiculo} se registrara antes, "create" se tomaría como id y daría 404.
-        $this->iniciarSesion()->get('/vehiculos/create')->assertStatus(501);
+        $this->iniciarSesion()->get('/vehiculos/create')->assertOk();
         $this->iniciarSesion()->get('/ordenes/create')->assertStatus(501);
         $this->iniciarSesion()->get('/servicios/create')->assertOk();
     }

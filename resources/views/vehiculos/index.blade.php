@@ -5,6 +5,11 @@
 @section('contenido')
     <h1 class="titulo-pagina">Vehículos registrados</h1>
 
+    {{-- Registrar es una ruta de escritura: solo se ofrece con sesión iniciada. --}}
+    @auth
+        <a class="boton" href="{{ route('vehiculos.create') }}">Registrar vehículo</a>
+    @endauth
+
     <form class="filtro" method="get" action="{{ route('vehiculos.index') }}">
         <label for="buscar">Buscar</label>
         <input type="search" name="buscar" id="buscar" value="{{ $buscar }}" placeholder="Placa, propietario o modelo" maxlength="100">

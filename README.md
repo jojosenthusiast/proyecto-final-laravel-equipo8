@@ -912,6 +912,17 @@ La ficha muestra tres indicadores calculados por el modelo: la cantidad de órde
 
 Las órdenes y su tipo de servicio se cargan juntos con `load(['ordenes' => ..., 'ordenes.tipoServicio'])`. Como `preventLazyLoading` está activo fuera de producción, olvidar el tipo de servicio no pasaría en silencio: la página fallaría con `LazyLoadingViolationException`. Se comprueba con `php artisan test --filter=VehiculoFichaTest`.
 
+#### Registro con imagen
+
+Con sesión iniciada, el listado muestra el botón «Registrar vehículo», que lleva a `/vehiculos/create`. Sin sesión, la ruta redirige al inicio de sesión.
+
+- **Formulario:** el parcial `vehiculos/partials/formulario.blade.php` lo comparten el registro y la edición. Sigue el contrato de marcado: cada campo va en `.campo` y, cuando falla, lleva `aria-invalid` y su mensaje en `.error-campo`, justo debajo. `old()` devuelve lo que el usuario escribió, así un error no obliga a llenar todo de nuevo. El archivo de la foto no se puede devolver con `old()` y hay que volver a elegirlo.
+- **Foto:** el `<form>` lleva `enctype="multipart/form-data"`, sin el cual el navegador no envía el archivo. El campo `imagen` acepta `.jpg`, `.jpeg`, `.png` y `.webp`, y su `data-vista-previa="vista-imagen"` apunta al `<img>` donde se muestra la foto elegida.
+- **Guardado:** `store(StoreVehiculoRequest $request, ImagenVehiculoService $imagenes)` recibe los datos ya validados. Si llegó una foto, el servicio de imágenes la guarda en el disco `public` y en la columna `imagen` solo queda la ruta (`vehiculos/abc123.png`), nunca el archivo. Sin foto, la columna queda en `null` y la ficha muestra `img/vehiculo-default.svg`.
+- **Resultado:** redirige a la ficha del vehículo con el mensaje «Vehículo registrado correctamente.», que muestra el layout.
+
+Se comprueba con `php artisan test --filter=VehiculoRegistroTest`. Las fotos de prueba son PNG porque algunas instalaciones de PHP traen GD sin soporte para JPEG, y `UploadedFile::fake()->image()` necesita GD para dibujarlas.
+
 
 
 
