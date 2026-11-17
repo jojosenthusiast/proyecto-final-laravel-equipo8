@@ -1148,7 +1148,7 @@ php artisan serve
 ```
 
 - `/ordenes`: listado con filtros por placa, fechas, estado y servicio.
-- `/ordenes/create?vehiculo=2` con sesión iniciada: registrar una orden para P000002 con 80 000 km muestra el error de la regla 3.
+- Con sesión iniciada, abrir la ficha de P000002 en `/vehiculos` y pulsar **Registrar orden** (el vehículo queda preseleccionado): una orden con 80 000 km muestra el error de la regla 3, porque su último kilometraje es 85 000.
 - En la ficha de una orden: **Pasar a En proceso** y luego **Pasar a Finalizada**. Después, abrir `/ordenes/{id}/edit` a mano responde 403.
 
 
