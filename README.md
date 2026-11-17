@@ -1124,6 +1124,33 @@ Solo se eliminan órdenes **pendientes**: una orden en proceso o finalizada ya e
 
 El botón **Eliminar** aparece en la ficha solo si la orden se puede borrar (`@can('delete', $orden)`). Sigue el contrato de marcado: formulario `POST` con `@csrf`, `@method('DELETE')`, `data-confirmar` y `onsubmit="return confirm(...)"`. Un `GET` a la misma URL solo muestra la ficha y nunca borra. Al eliminar, se vuelve al listado con «Orden #N eliminada correctamente.». Se comprueba con `php artisan test --filter=OrdenEliminacionTest`.
 
+#### Resumen de reglas y cálculos del módulo
+
+| Regla o cálculo | Dónde se aplica | Prueba |
+| --- | --- | --- |
+| Regla 3: el kilometraje de ingreso no baja del último registrado | `KilometrajeNoMenorAlUltimo` en `StoreOrdenServicioRequest` y `UpdateOrdenServicioRequest` | `OrdenTransaccionTest`, `OrdenEdicionTest` |
+| Regla 4: la entrega no es anterior al ingreso | `after_or_equal:fecha_ingreso` en los requests y comprobación al finalizar en `CambiarEstadoOrdenRequest` | `OrdenRegistroTest`, `OrdenEstadoTest` |
+| Regla 5: una orden finalizada no se edita | `OrdenServicioPolicy::update()` con `Gate::authorize()` y `@can` en la vista | `OrdenEdicionTest` |
+| Costo total = precio base + costo adicional | `OrdenServicio::calcularCostoTotal()`, al registrar y al editar | `OrdenCostoTest` |
+| Transiciones sin saltos ni retrocesos | `CambiarEstadoOrdenRequest` contra `siguienteEstado()` | `OrdenEstadoTest` |
+| Orden y kilometraje del vehículo se guardan juntos | `DB::transaction()` en `store` y `update` | `OrdenTransaccionTest` |
+
+#### Prueba de integración del ciclo completo
+
+`CicloOrdenTest` automatiza el recorrido de la defensa. Abre el formulario desde el vehículo (preseleccionado) y registra una orden por HTTP. Comprueba que el total lo calculó el backend y que el kilometraje del vehículo subió. Después prueba que otra orden con menos kilometraje se rechaza (regla 3), que saltar de pendiente a finalizada falla y avanza los estados uno a uno. Con la orden finalizada, comprueba que editarla, enviarla a mano o eliminarla responde 403 (regla 5). Por último, verifica que el ingreso aparece en `/reportes` (C8). Si esta prueba pasa, el recorrido en vivo funciona.
+
+#### Comprobación rápida de mi bloque
+
+```bash
+php artisan test --filter="Orden|CicloOrdenTest"
+php artisan migrate:fresh --seed
+php artisan serve
+```
+
+- `/ordenes`: listado con filtros por placa, fechas, estado y servicio.
+- `/ordenes/create?vehiculo=2` con sesión iniciada: registrar una orden para P000002 con 80 000 km muestra el error de la regla 3.
+- En la ficha de una orden: **Pasar a En proceso** y luego **Pasar a Finalizada**. Después, abrir `/ordenes/{id}/edit` a mano responde 403.
+
 
 
 
