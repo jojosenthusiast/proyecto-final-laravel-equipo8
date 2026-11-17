@@ -1157,4 +1157,220 @@ php artisan serve
 
 ### Interfaz y cierre (Milton)
 
-*Pendiente: Milton documenta aquí la interfaz adaptable, el panel, las capturas y la distribución del trabajo.*
+El layout carga los estilos y el JavaScript compartidos. Los formularios señalan el primer campo con error y muestran un resumen con enlaces a los campos. Los avisos de sesión distinguen éxito y error y pueden cerrarse.
+
+El diálogo de eliminación se abre en los formularios con `data-confirmar`. Al cancelar, el foco vuelve al botón de origen. Si el archivo `biela.js` no carga, se conserva la confirmación nativa que traen los formularios. Al elegir una foto en un formulario de vehículo, se muestra una vista previa con el límite de 2 MB para JPG, PNG y WEBP. Laravel conserva la validación definitiva.
+
+Por debajo de 640 px, el menú se pliega y las tablas muestran las filas como tarjetas con sus etiquetas. En los listados que ordenan resultados, el control «Ordenar resultados» mantiene disponibles las opciones del encabezado. El panel reúne el total de vehículos y órdenes, los ingresos por órdenes finalizadas ingresadas en el mes, la distribución por estado y la orden abierta más antigua. El reporte incorpora barras de ingresos y el botón «Imprimir» para usar la impresora o guardar un PDF desde el navegador.
+
+#### Comprobación del bloque
+
+```bash
+php artisan test --filter="InterfazBaseTest|AlertasTest|NavegacionTest|PanelTest|ReporteVistaTest|RecorridoDefensaTest|EtiquetasConceptoTest"
+php artisan test
+```
+
+- Abrir las páginas de la defensa a 360, 768 y 1280 px y comprobar que la página no desborde.
+- Iniciar sesión con el usuario de desarrollo. En vehículos, órdenes o servicios, elegir «Eliminar» y cancelar antes de repetir. Si se bloquea solo `biela.js` en el navegador, debe aparecer la confirmación nativa.
+- En edición de vehículo, seleccionar una foto compatible y comprobar que aparece antes de guardar. Seleccionar luego una de más de 2 MB para ver el aviso.
+- Abrir Reportes e Historial, filtrar y probar «Imprimir». La vista impresa oculta el menú, los filtros y las acciones.
+- El recorrido automatizado usa los datos de prueba, comprueba las pantallas principales de los módulos y verifica el 403 de una orden finalizada.
+
+#### Capturas
+
+Capturas de Laravel en ejecución con datos de prueba. Las pantallas 429 y 500 se reprodujeron de forma controlada en el entorno de pruebas. La imagen de la vista previa es una ilustración de prueba seleccionada desde el formulario.
+
+<details>
+<summary>Panel con indicadores, ingresos del mes y estados</summary>
+
+![Panel con indicadores, ingresos del mes y estados](docs/capturas/01-panel.png)
+
+</details>
+
+<details>
+<summary>Listado de vehículos con búsqueda por placa</summary>
+
+![Listado de vehículos con búsqueda por placa](docs/capturas/02-vehiculos-busqueda.png)
+
+</details>
+
+<details>
+<summary>Ficha del vehículo y su historial</summary>
+
+![Ficha del vehículo y su historial](docs/capturas/03-ficha-vehiculo.png)
+
+</details>
+
+<details>
+<summary>Registro de vehículo con resumen de errores</summary>
+
+![Registro de vehículo con resumen de errores](docs/capturas/04-registro-errores.png)
+
+</details>
+
+<details>
+<summary>Edición de vehículo con vista previa de la foto</summary>
+
+![Edición de vehículo con vista previa de la foto](docs/capturas/05-edicion-vista-previa.png)
+
+</details>
+
+<details>
+<summary>Diálogo de confirmación de eliminación</summary>
+
+![Diálogo de confirmación de eliminación](docs/capturas/06-confirmar-eliminacion.png)
+
+</details>
+
+<details>
+<summary>Aviso al intentar borrar un vehículo con órdenes</summary>
+
+![Aviso al intentar borrar un vehículo con órdenes](docs/capturas/07-vehiculo-con-ordenes.png)
+
+</details>
+
+<details>
+<summary>Listado de órdenes y filtros</summary>
+
+![Listado de órdenes y filtros](docs/capturas/08-ordenes.png)
+
+</details>
+
+<details>
+<summary>Error de kilometraje inferior al último registrado</summary>
+
+![Error de kilometraje inferior al último registrado](docs/capturas/09-orden-kilometraje.png)
+
+</details>
+
+<details>
+<summary>Pantalla 403 al intentar editar una orden finalizada</summary>
+
+![Pantalla 403 al intentar editar una orden finalizada](docs/capturas/10-orden-finalizada-403.png)
+
+</details>
+
+<details>
+<summary>Reporte con ingresos por servicio y botón de impresión</summary>
+
+![Reporte con ingresos por servicio y botón de impresión](docs/capturas/11-reporte.png)
+
+</details>
+
+<details>
+<summary>Historial de servicios por vehículo</summary>
+
+![Historial de servicios por vehículo](docs/capturas/12-historial.png)
+
+</details>
+
+<details>
+<summary>Catálogo de servicios</summary>
+
+![Catálogo de servicios](docs/capturas/13-servicios.png)
+
+</details>
+
+<details>
+<summary>Inicio de sesión</summary>
+
+![Inicio de sesión](docs/capturas/14-login.png)
+
+</details>
+
+<details>
+<summary>Pantalla 419 de sesión o formulario expirado</summary>
+
+![Pantalla 419 de sesión o formulario expirado](docs/capturas/15-sesion-expirada-419.png)
+
+</details>
+
+<details>
+<summary>Panel a 360 px con el menú abierto</summary>
+
+![Panel a 360 px con el menú abierto](docs/capturas/16-panel-movil.png)
+
+</details>
+
+<details>
+<summary>Listado a 360 px con filas en formato de tarjetas</summary>
+
+![Listado a 360 px con filas en formato de tarjetas](docs/capturas/17-vehiculos-movil.png)
+
+</details>
+
+<details>
+<summary>Validación de una placa con formato incorrecto</summary>
+
+![Validación de una placa con formato incorrecto](docs/capturas/18-placa-invalida.png)
+
+</details>
+
+<details>
+<summary>Validación de un año fuera del rango permitido</summary>
+
+![Validación de un año fuera del rango permitido](docs/capturas/19-anio-invalido.png)
+
+</details>
+
+<details>
+<summary>Validación de la fecha de entrega anterior al ingreso</summary>
+
+![Validación de la fecha de entrega anterior al ingreso](docs/capturas/20-fechas-orden.png)
+
+</details>
+
+<details>
+<summary>Pantalla 404 al consultar un vehículo inexistente</summary>
+
+![Pantalla 404 al consultar un vehículo inexistente](docs/capturas/21-no-encontrado-404.png)
+
+</details>
+
+<details>
+<summary>Pantalla 429 de demasiados intentos</summary>
+
+![Pantalla 429 de demasiados intentos](docs/capturas/22-demasiados-intentos-429.png)
+
+</details>
+
+<details>
+<summary>Pantalla 500 de error inesperado</summary>
+
+![Pantalla 500 de error inesperado](docs/capturas/23-error-500.png)
+
+</details>
+
+#### Reglas de negocio y verificación
+
+| Regla | Dónde se aplica | Prueba |
+| --- | --- | --- |
+| Placa única con formato `P` y seis dígitos | `StoreVehiculoRequest`, `UpdateVehiculoRequest` e índice único | `VehiculoValidacionHttpTest`, `VehiculoEdicionTest` |
+| Año válido entre 1980 y el año actual más uno | `StoreVehiculoRequest` y `UpdateVehiculoRequest` | `VehiculoValidacionHttpTest` |
+| El kilometraje no puede bajar del último registrado | `KilometrajeNoMenorAlUltimo` y validación de vehículos y órdenes | `ReglaKilometrajeTest`, `CicloOrdenTest` |
+| La entrega no puede ser anterior al ingreso | `StoreOrdenServicioRequest`, `UpdateOrdenServicioRequest` y validación de la transición final | `OrdenRegistroTest`, `OrdenEdicionTest`, `OrdenEstadoTest` |
+| Una orden finalizada no se puede editar | `OrdenServicioPolicy` y autorización en el controlador | `OrdenEdicionTest`, `RecorridoDefensaTest` |
+| El costo total suma el precio base y el costo adicional | `OrdenServicio::calcularCostoTotal()` | `OrdenCostoTest` |
+| Un vehículo o servicio con órdenes no se puede borrar | `VehiculoController`, `TipoServicioController` y llaves foráneas | `VehiculoEliminacionTest`, `TipoServicioEliminarTest` |
+
+#### Distribución del trabajo
+
+Conteo del historial a la revisión base `cf79745`, correspondiente al ZIP del equipo. La columna de Fase 1 agrupa los nombres de autor que identifican a una misma persona. Los cambios M1–M10 de esta entrega se cuentan en Fase 2 cuando se registren en Git.
+
+| Integrante | Módulo principal | Commits hasta `v1.0` | Commits de Fase 2 hasta la base |
+| --- | --- | ---: | ---: |
+| Carlos · `jojosenthusiast` | Base, contratos, datos de defensa y reporte | 11 | 10 |
+| Ángel · `angelcoto-stack` | Autenticación, seguridad y páginas de error | 9 | 12 |
+| Fernando · `fernandovalle45` | Imágenes y catálogo | 10 | 11 |
+| Jorge · `JorgeRamos2001` | Vehículos y validaciones | 10 | 10 |
+| Leonel · `leonelgit` | Órdenes y ciclo de servicio | 10 | 11 |
+| Milton · `Milton84-toc` | Interfaz, panel, presentación del reporte y cierre | 1 | 0 |
+
+Para actualizar la tabla después de integrar la entrega, ejecutar `git shortlog -sn v1.0..HEAD`. El historial base ya contiene commits con fecha de autor de cuatro días distintos (13, 14, 15 y 17 de noviembre de 2026).
+
+#### Cambios respecto a la Fase 1
+
+- Se agregaron dos migraciones independientes para el costo adicional de las órdenes y los índices de vehículos. Así, una instalación de Fase 1 puede avanzar con `php artisan migrate` y conservar sus datos.
+- Vehículos pasó de listado y ficha a registro, edición y eliminación, con carga de fotos. Se ampliaron las órdenes y el catálogo y se agregó el reporte con CSV e historial.
+- Se incorporó el inicio de sesión para las operaciones de escritura. La lectura pública se conserva.
+- El panel y los estilos compartidos quedaron a cargo de Milton. El reporte de Carlos mantiene sus consultas y rutas, con presentación e impresión añadidas en sus vistas.

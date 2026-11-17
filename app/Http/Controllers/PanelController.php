@@ -5,62 +5,70 @@ namespace App\Http\Controllers;
 use App\Models\OrdenServicio;
 use App\Models\TipoServicio;
 use App\Models\Vehiculo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PanelController extends Controller
 {
-    /**
-     * Obtiene los indicadores y movimientos del taller.
-     */
-    public function index()
+    public function index(): View
     {
-        // [CRUD-READ] Consultas de lectura mediante Eloquent.
+        // [CRUD-READ] Agrupa las órdenes en una consulta, incluso cuando un estado está vacío.
+        $conteos = OrdenServicio::query()
+            ->select('estado')
+            ->selectRaw('COUNT(*) AS total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
 
-        // Total de vehículos registrados.
-        $totalVehiculos = Vehiculo::count();
+        $ordenesPorEstado = [];
+        foreach (OrdenServicio::ESTADOS as $estado) {
+            $ordenesPorEstado[$estado] = (int) $conteos->get($estado, 0);
+        }
 
-        // Total de órdenes de servicio.
-        $totalOrdenes = OrdenServicio::count();
+        $totalOrdenes = array_sum($ordenesPorEstado);
+        $porcentajes = array_map(
+            fn (int $cantidad): int => $totalOrdenes ? (int) round($cantidad * 100 / $totalOrdenes) : 0,
+            $ordenesPorEstado,
+        );
 
-        // Cantidad de órdenes por estado.
-        $ordenesPorEstado = [
-            'pendiente' => OrdenServicio::where(
-                'estado',
-                'pendiente'
-            )->count(),
+        $hoy = now();
+        $finalizadasDelMes = OrdenServicio::query()->estado('finalizada')
+            ->delPeriodo($hoy->copy()->startOfMonth()->toDateString(), $hoy->copy()->endOfMonth()->toDateString());
 
-            'en_proceso' => OrdenServicio::where(
-                'estado',
-                'en_proceso'
-            )->count(),
+        // Los dos totales se obtienen juntos y el filtro mensual reutiliza el scope del reporte.
+        $totales = DB::query()
+            ->selectSub(Vehiculo::query()->selectRaw('COUNT(*)'), 'vehiculos')
+            ->selectSub($finalizadasDelMes->selectRaw('COALESCE(SUM(costo_total), 0)'), 'ingresos')
+            ->first();
 
-            'finalizada' => OrdenServicio::where(
-                'estado',
-                'finalizada'
-            )->count(),
-        ];
+        $ordenAntigua = OrdenServicio::query()->pendientes()
+            ->with('vehiculo')
+            ->oldest('fecha_ingreso')
+            ->orderBy('id')
+            ->first();
 
-        // Servicios más solicitados, ordenados por cantidad de órdenes.
         $tiposServicio = TipoServicio::withCount('ordenes')
             ->orderByDesc('ordenes_count')
             ->orderBy('nombre')
             ->get();
 
-        // Cinco órdenes más recientes con sus relaciones cargadas.
-        $ultimasOrdenes = OrdenServicio::with([
-            'vehiculo',
-            'tipoServicio',
-        ])
-            ->orderByDesc('fecha_ingreso')
-            ->orderByDesc('id')
+        $ultimasOrdenes = DB::table('ordenes_servicio as orden')
+            ->join('vehiculos as vehiculo', 'orden.vehiculo_id', '=', 'vehiculo.id')
+            ->join('tipos_servicio as servicio', 'orden.tipo_servicio_id', '=', 'servicio.id')
+            ->select('orden.id', 'orden.vehiculo_id', 'orden.estado', 'orden.fecha_ingreso', 'vehiculo.placa', 'servicio.nombre as servicio')
+            ->orderByDesc('orden.fecha_ingreso')
+            ->orderByDesc('orden.id')
             ->limit(5)
             ->get();
 
-        return view('panel.index', compact(
-            'totalVehiculos',
-            'totalOrdenes',
-            'ordenesPorEstado',
-            'tiposServicio',
-            'ultimasOrdenes'
-        ));
+        return view('panel.index', [
+            'totalVehiculos' => (int) $totales->vehiculos,
+            'ingresosMes' => (float) $totales->ingresos,
+            'totalOrdenes' => $totalOrdenes,
+            'ordenesPorEstado' => $ordenesPorEstado,
+            'porcentajes' => $porcentajes,
+            'ordenAntigua' => $ordenAntigua,
+            'tiposServicio' => $tiposServicio,
+            'ultimasOrdenes' => $ultimasOrdenes,
+        ]);
     }
 }
