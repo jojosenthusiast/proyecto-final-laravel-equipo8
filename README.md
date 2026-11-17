@@ -1061,6 +1061,26 @@ Se comprueba con `php artisan test --filter=OrdenListadoTest`.
 
 La ficha muestra el estado, el vehículo (con enlace a su ficha), el servicio (con enlace a la ficha del servicio), las fechas de ingreso y entrega, el kilometraje de ingreso y la descripción. Debajo va el **desglose del costo**: precio base del servicio, costo adicional y costo total. Se comprueba con `php artisan test --filter=OrdenListadoTest`.
 
+#### Registro de órdenes (`/ordenes/create`)
+
+Registrar requiere sesión. El formulario tiene listas desplegables de vehículos (por placa) y de tipos de servicio (con su precio base). Si se llega desde la ficha del vehículo con `/ordenes/create?vehiculo=ID`, ese vehículo queda preseleccionado.
+
+`StoreOrdenServicioRequest` valida en el servidor, así que los errores aparecen aunque el navegador no valide (`novalidate`). Los mensajes están en español y el formulario conserva lo escrito con `old()`.
+
+| Campo | Reglas |
+| --- | --- |
+| `vehiculo_id` | `required`, `integer`, `exists:vehiculos,id` |
+| `tipo_servicio_id` | `required`, `integer`, `exists:tipos_servicio,id` |
+| `fecha_ingreso` | `required`, `date`, `before_or_equal:today` |
+| `fecha_entrega` | `nullable`, `date`, `after_or_equal:fecha_ingreso` (**regla 4**) |
+| `kilometraje_ingreso` | `required`, `integer`, `min:0`, `max:999999` |
+| `descripcion` | `required`, `string`, `max:1000` |
+| `costo_adicional` | `nullable`, `numeric`, `min:0`, `max:99999.99` |
+
+**Regla 4:** si la entrega es anterior al ingreso aparece «La fecha de entrega no puede ser anterior a la fecha de ingreso.» y la orden no se guarda.
+
+`costo_total` y `estado` no están en las reglas, así que `validated()` los descarta aunque alguien los envíe a mano. Toda orden nueva empieza en `pendiente`. Al guardar, el controlador redirige a la ficha con «Orden registrada correctamente.». Se comprueba con `php artisan test --filter=OrdenRegistroTest`.
+
 
 
 

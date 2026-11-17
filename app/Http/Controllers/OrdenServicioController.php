@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreOrdenServicioRequest;
 use App\Models\OrdenServicio;
 use App\Models\TipoServicio;
+use App\Models\Vehiculo;
 use Illuminate\Http\Request;
 
 // Esqueleto fijado en C6: las firmas son contrato. Leo reemplaza cada abort(501) en su commit
@@ -51,14 +53,35 @@ class OrdenServicioController extends Controller
     }
 
     // Acepta ?vehiculo=ID para preseleccionar el vehículo desde su ficha.
-    public function create(Request $request)
+    public function create(Request $request) // [CRUD-CREATE]
     {
-        abort(501, 'Pendiente: L3 (Leo)');
+        $orden = new OrdenServicio([
+            // Selección desde la entidad principal: la ficha del vehículo enlaza con ?vehiculo=ID.
+            'vehiculo_id' => filter_var($request->query('vehiculo'), FILTER_VALIDATE_INT) ?: null,
+            'fecha_ingreso' => today(),
+        ]);
+
+        return view('ordenes.create', array_merge(compact('orden'), $this->opcionesFormulario()));
     }
 
-    public function store(Request $request)
+    public function store(StoreOrdenServicioRequest $request) // [CRUD-CREATE]
     {
-        abort(501, 'Pendiente: L3 (Leo)');
+        // [SEGURIDAD] Solo los campos validados; costo_total y estado no vienen del formulario.
+        $datos = $request->validated();
+
+        $orden = new OrdenServicio($datos);
+        $orden->estado = 'pendiente';
+        $orden->costo_adicional = $datos['costo_adicional'] ?? 0;
+
+        // [REGLA-NEGOCIO] costo_total = precio base del servicio + costo adicional.
+        $precioBase = (float) TipoServicio::whereKey($orden->tipo_servicio_id)->value('precio_base');
+        $orden->costo_total = round($precioBase + (float) $orden->costo_adicional, 2);
+
+        $orden->save();
+
+        return redirect()
+            ->route('ordenes.show', $orden)
+            ->with('exito', 'Orden registrada correctamente.');
     }
 
     public function edit(OrdenServicio $orden)
@@ -79,5 +102,16 @@ class OrdenServicioController extends Controller
     public function destroy(OrdenServicio $orden)
     {
         abort(501, 'Pendiente: L8 (Leo)');
+    }
+
+    /**
+     * Listas desplegables del formulario: vehículos por placa y servicios con su precio.
+     */
+    private function opcionesFormulario(): array
+    {
+        return [
+            'vehiculos' => Vehiculo::orderBy('placa')->get(['id', 'placa', 'marca', 'modelo']),
+            'tiposServicio' => TipoServicio::orderBy('nombre')->get(['id', 'nombre', 'precio_base']),
+        ];
     }
 }
