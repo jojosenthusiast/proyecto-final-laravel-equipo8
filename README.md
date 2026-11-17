@@ -113,15 +113,15 @@ Cada modelo define `$fillable` y `casts()` para proteger la asignación masiva y
 
 Las dos llaves foráneas de `ordenes_servicio` usan `restrictOnDelete()`. Un taller no pierde el historial de un vehículo ni borra un tipo de servicio que ya tiene órdenes. En la Fase 2 el borrado mostrará un mensaje claro en lugar de una excepción.
 
-### Reglas de negocio (pendientes para la Fase 2)
+### Reglas de negocio (implementadas en la Fase 2)
 
-Se validarán en el servidor durante la Fase 2:
+Se validan en el servidor:
 
-1. Placa única con formato definido por el equipo (`P` y seis dígitos, por ejemplo `P123456`).
-2. Año del vehículo entre 1980 y el año actual + 1.
-3. El kilometraje de ingreso no puede ser menor que el último registrado para el vehículo.
-4. La fecha de entrega no puede ser anterior a la de ingreso.
-5. Una orden finalizada no puede editarse.
+1. Placa única con formato definido por el equipo (`P` y seis dígitos, por ejemplo `P123456`). Se valida en `StoreVehiculoRequest` y `UpdateVehiculoRequest`.
+2. Año del vehículo entre 1980 y el año actual + 1. Se valida en `StoreVehiculoRequest`.
+3. El kilometraje de ingreso no puede ser menor que el último registrado para el vehículo. Lo valida la regla `KilometrajeNoMenorAlUltimo`, que usan los Form Requests de vehículos y de órdenes.
+4. La fecha de entrega no puede ser anterior a la de ingreso. Se valida en `StoreOrdenServicioRequest`.
+5. Una orden finalizada no puede editarse. La aplica `OrdenServicioPolicy` y responde 403.
 
 ## 6. Vehículos
 
