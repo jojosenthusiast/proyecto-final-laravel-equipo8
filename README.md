@@ -1103,6 +1103,18 @@ El total nunca llega del formulario: aunque alguien envíe `costo_total=1` a man
 
 `UpdateOrdenServicioRequest` hereda las reglas y los mensajes del registro (`StoreOrdenServicioRequest::reglas()`), así que las **reglas 3 y 4** también se aplican al editar. La regla 3 recibe el id de la orden, `new KilometrajeNoMenorAlUltimo($vehiculoId, $this->route('orden')->id)`, para no compararla consigo misma. `update` recalcula el costo total con `calcularCostoTotal()`, sube el kilometraje del vehículo en la misma transacción si corresponde y muestra «Orden actualizada correctamente.». Se comprueba con `php artisan test --filter=OrdenEdicionTest`.
 
+#### Cambio de estado (`PATCH /ordenes/{orden}/estado`)
+
+El estado avanza en un solo sentido: **pendiente → en proceso → finalizada**. La ficha muestra un único botón, «Pasar a En proceso» o «Pasar a Finalizada», dentro de un formulario con `@csrf` y `@method('PATCH')`. Una orden finalizada ya no muestra ninguno.
+
+`CambiarEstadoOrdenRequest` valida contra `OrdenServicio::TRANSICIONES` (con `siguienteEstado()`), no contra `ESTADOS`. Por eso:
+
+- Saltar de pendiente a finalizada se rechaza con «La orden solo puede pasar a En proceso.».
+- Volver de finalizada a pendiente se rechaza con «Esta orden está finalizada y ya no cambia de estado.».
+- Cualquier estado inventado también se rechaza.
+
+Al pasar a **finalizada**, si la orden no tenía fecha de entrega se registra la de hoy. Si ya tenía una, se conserva, siempre que no sea anterior al ingreso (**regla 4**). Cada cambio muestra un mensaje flash, por ejemplo «La orden pasó a Finalizada.». Se comprueba con `php artisan test --filter=OrdenEstadoTest`.
+
 
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CambiarEstadoOrdenRequest;
 use App\Http\Requests\StoreOrdenServicioRequest;
 use App\Http\Requests\UpdateOrdenServicioRequest;
 use App\Models\OrdenServicio;
@@ -126,9 +127,22 @@ class OrdenServicioController extends Controller
             ->with('exito', 'Orden actualizada correctamente.');
     }
 
-    public function cambiarEstado(Request $request, OrdenServicio $orden)
+    public function cambiarEstado(CambiarEstadoOrdenRequest $request, OrdenServicio $orden) // [CRUD-UPDATE]
     {
-        abort(501, 'Pendiente: L7 (Leo)');
+        // El request ya comprobó que el nuevo estado es exactamente $orden->siguienteEstado().
+        $orden->estado = $request->validated('estado');
+
+        // [REGLA-NEGOCIO] Al finalizar se registra la entrega; si ya tenía fecha, se conserva
+        // (el request comprobó que no es anterior al ingreso, regla 4).
+        if ($orden->estaFinalizada() && $orden->fecha_entrega === null) {
+            $orden->fecha_entrega = today();
+        }
+
+        $orden->save();
+
+        return redirect()
+            ->route('ordenes.show', $orden)
+            ->with('exito', 'La orden pasó a '.CambiarEstadoOrdenRequest::NOMBRES[$orden->estado].'.');
     }
 
     public function destroy(OrdenServicio $orden)

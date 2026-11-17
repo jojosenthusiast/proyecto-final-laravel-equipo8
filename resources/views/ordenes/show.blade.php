@@ -65,6 +65,24 @@
         </tbody>
     </table>
 
+    {{-- El botón ofrece solo la siguiente transición; el request la vuelve a validar en el servidor. --}}
+    @auth
+        @if ($orden->siguienteEstado())
+            <form method="POST" action="{{ route('ordenes.estado', $orden) }}">
+                @csrf
+                @method('PATCH')
+
+                <input type="hidden" name="estado" value="{{ $orden->siguienteEstado() }}">
+
+                <button class="boton" type="submit">Pasar a {{ $nombresEstado[$orden->siguienteEstado()] }}</button>
+
+                @error('estado')
+                    <p class="error-campo" id="estado-error">{{ $message }}</p>
+                @enderror
+            </form>
+        @endif
+    @endauth
+
     <p>
         {{-- La política decide en el servidor; el botón solo se oculta para no ofrecer algo prohibido. --}}
         @auth
