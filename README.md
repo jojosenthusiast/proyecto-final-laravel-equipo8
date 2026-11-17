@@ -1081,6 +1081,12 @@ Registrar requiere sesión. El formulario tiene listas desplegables de vehículo
 
 `costo_total` y `estado` no están en las reglas, así que `validated()` los descarta aunque alguien los envíe a mano. Toda orden nueva empieza en `pendiente`. Al guardar, el controlador redirige a la ficha con «Orden registrada correctamente.». Se comprueba con `php artisan test --filter=OrdenRegistroTest`.
 
+#### Costo total calculado por el sistema (criterio 4)
+
+`OrdenServicio::calcularCostoTotal()` aplica la fórmula acordada: **costo_total = precio_base del tipo de servicio + costo_adicional**, redondeado a dos decimales. Si no hay costo adicional, cuenta como 0. El controlador la llama antes de guardar al registrar y, desde L6, también al editar.
+
+El total nunca llega del formulario: aunque alguien envíe `costo_total=1` a mano, `validated()` lo descarta y se guarda precio base + adicional. Todo corre en el backend de Laravel de la propia aplicación, sin servicios externos. Se comprueba con `php artisan test --filter=OrdenCostoTest`.
+
 
 
 

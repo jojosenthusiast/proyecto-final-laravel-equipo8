@@ -73,9 +73,8 @@ class OrdenServicioController extends Controller
         $orden->estado = 'pendiente';
         $orden->costo_adicional = $datos['costo_adicional'] ?? 0;
 
-        // [REGLA-NEGOCIO] costo_total = precio base del servicio + costo adicional.
-        $precioBase = (float) TipoServicio::whereKey($orden->tipo_servicio_id)->value('precio_base');
-        $orden->costo_total = round($precioBase + (float) $orden->costo_adicional, 2);
+        // [REGLA-NEGOCIO] El total lo calcula el modelo: precio base del servicio + costo adicional.
+        $orden->calcularCostoTotal();
 
         $orden->save();
 

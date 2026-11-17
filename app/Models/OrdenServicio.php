@@ -100,4 +100,14 @@ class OrdenServicio extends Model
     {
         return self::TRANSICIONES[$this->estado] ?? null;
     }
+
+    // [REGLA-NEGOCIO] Criterio 4: costo_total = precio base del tipo de servicio + costo adicional.
+    // Lo calcula siempre el backend; el formulario nunca envía el total.
+    public function calcularCostoTotal(): void
+    {
+        $this->costo_total = round(
+            (float) $this->tipoServicio->precio_base + (float) ($this->costo_adicional ?? 0),
+            2
+        );
+    }
 }
