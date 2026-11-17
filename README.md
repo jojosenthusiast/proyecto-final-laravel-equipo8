@@ -1093,6 +1093,16 @@ El total nunca llega del formulario: aunque alguien envíe `costo_total=1` a man
 
 **Transacción:** `store` envuelve en `DB::transaction()` la creación de la orden, el cálculo del costo y la actualización del vehículo. Si el kilometraje de ingreso supera el del vehículo, el vehículo queda con el nuevo valor. Si cualquier paso lanza una excepción, Laravel revierte todo: no queda una orden guardada con el vehículo sin actualizar, ni al revés. Se comprueba con `php artisan test --filter=OrdenTransaccionTest`, que simula un fallo al actualizar el vehículo.
 
+#### Edición y regla 5 (`/ordenes/{orden}/edit`)
+
+**Regla 5:** una orden finalizada no puede editarse. Se aplica en el servidor con `OrdenServicioPolicy::update()`, que devuelve `Response::deny('Esta orden está finalizada y no puede editarse.')` cuando `puedeEditarse()` es falso. La regla se comprueba en tres lugares:
+
+- `edit` llama a `Gate::authorize('update', $orden)`: abrir la URL a mano responde 403 y la página 403 de Ángel muestra el mensaje.
+- `UpdateOrdenServicioRequest::authorize()` aplica la misma política. Laravel corre `authorize()` antes de validar, así que un `PUT` enviado a mano sobre una orden finalizada responde 403 y la base no cambia.
+- En la ficha, el botón **Editar** está dentro de `@can('update', $orden)`. Esto solo evita ofrecerlo: la seguridad la da la política.
+
+`UpdateOrdenServicioRequest` hereda las reglas y los mensajes del registro (`StoreOrdenServicioRequest::reglas()`), así que las **reglas 3 y 4** también se aplican al editar. La regla 3 recibe el id de la orden, `new KilometrajeNoMenorAlUltimo($vehiculoId, $this->route('orden')->id)`, para no compararla consigo misma. `update` recalcula el costo total con `calcularCostoTotal()`, sube el kilometraje del vehículo en la misma transacción si corresponde y muestra «Orden actualizada correctamente.». Se comprueba con `php artisan test --filter=OrdenEdicionTest`.
+
 
 
 

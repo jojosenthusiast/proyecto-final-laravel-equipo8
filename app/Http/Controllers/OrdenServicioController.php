@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrdenServicioRequest;
+use App\Http\Requests\UpdateOrdenServicioRequest;
 use App\Models\OrdenServicio;
 use App\Models\TipoServicio;
 use App\Models\Vehiculo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 // Esqueleto fijado en C6: las firmas son contrato. Leo reemplaza cada abort(501) en su commit
 // y puede cambiar Request por su Form Request sin cambiar el nombre del método ni del parámetro.
@@ -82,11 +84,7 @@ class OrdenServicioController extends Controller
             $orden->calcularCostoTotal();
             $orden->save();
 
-            $vehiculo = Vehiculo::findOrFail($orden->vehiculo_id);
-
-            if ($orden->kilometraje_ingreso > $vehiculo->kilometraje) {
-                $vehiculo->update(['kilometraje' => $orden->kilometraje_ingreso]);
-            }
+            $this->actualizarKilometrajeDelVehiculo($orden);
 
             return $orden;
         });
@@ -96,14 +94,36 @@ class OrdenServicioController extends Controller
             ->with('exito', 'Orden registrada correctamente.');
     }
 
-    public function edit(OrdenServicio $orden)
+    public function edit(OrdenServicio $orden) // [CRUD-UPDATE]
     {
-        abort(501, 'Pendiente: L6 (Leo)');
+        // [SEGURIDAD] Regla 5 en el servidor: una orden finalizada responde 403 aunque se
+        // escriba la URL a mano.
+        Gate::authorize('update', $orden);
+
+        return view('ordenes.edit', array_merge(compact('orden'), $this->opcionesFormulario()));
     }
 
-    public function update(Request $request, OrdenServicio $orden)
+    public function update(UpdateOrdenServicioRequest $request, OrdenServicio $orden) // [CRUD-UPDATE]
     {
-        abort(501, 'Pendiente: L6 (Leo)');
+        Gate::authorize('update', $orden);
+
+        $datos = $request->validated();
+
+        // [REGLA-NEGOCIO] Igual que al registrar: la orden y el kilometraje del vehículo se
+        // guardan juntos y el total se recalcula, porque pudo cambiar el servicio o el adicional.
+        DB::transaction(function () use ($orden, $datos) {
+            $orden->fill($datos);
+            $orden->costo_adicional = $datos['costo_adicional'] ?? 0;
+            $orden->load('tipoServicio');
+            $orden->calcularCostoTotal();
+            $orden->save();
+
+            $this->actualizarKilometrajeDelVehiculo($orden);
+        });
+
+        return redirect()
+            ->route('ordenes.show', $orden)
+            ->with('exito', 'Orden actualizada correctamente.');
     }
 
     public function cambiarEstado(Request $request, OrdenServicio $orden)
@@ -114,6 +134,18 @@ class OrdenServicioController extends Controller
     public function destroy(OrdenServicio $orden)
     {
         abort(501, 'Pendiente: L8 (Leo)');
+    }
+
+    /**
+     * Sube el kilometraje del vehículo si la orden registró uno mayor; nunca lo baja.
+     */
+    private function actualizarKilometrajeDelVehiculo(OrdenServicio $orden): void
+    {
+        $vehiculo = Vehiculo::findOrFail($orden->vehiculo_id);
+
+        if ($orden->kilometraje_ingreso > $vehiculo->kilometraje) {
+            $vehiculo->update(['kilometraje' => $orden->kilometraje_ingreso]);
+        }
     }
 
     /**

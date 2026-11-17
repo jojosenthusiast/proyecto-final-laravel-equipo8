@@ -66,6 +66,13 @@
     </table>
 
     <p>
+        {{-- La política decide en el servidor; el botón solo se oculta para no ofrecer algo prohibido. --}}
+        @auth
+            @can('update', $orden)
+                <a class="boton" href="{{ route('ordenes.edit', $orden) }}">Editar</a>
+            @endcan
+        @endauth
+
         <a class="boton" href="{{ route('ordenes.index') }}">Volver al listado</a>
     </p>
 @endsection
