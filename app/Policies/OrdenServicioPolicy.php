@@ -17,4 +17,13 @@ class OrdenServicioPolicy
             ? Response::allow()
             : Response::deny('Esta orden está finalizada y no puede editarse.');
     }
+
+    // [SEGURIDAD] Solo se elimina una orden pendiente: en proceso o finalizada ya es historial
+    // trabajado del vehículo.
+    public function delete(?User $user, OrdenServicio $orden): Response
+    {
+        return $orden->estado === 'pendiente'
+            ? Response::allow()
+            : Response::deny('Solo se pueden eliminar órdenes pendientes.');
+    }
 }

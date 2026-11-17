@@ -1115,6 +1115,12 @@ El estado avanza en un solo sentido: **pendiente → en proceso → finalizada**
 
 Al pasar a **finalizada**, si la orden no tenía fecha de entrega se registra la de hoy. Si ya tenía una, se conserva, siempre que no sea anterior al ingreso (**regla 4**). Cada cambio muestra un mensaje flash, por ejemplo «La orden pasó a Finalizada.». Se comprueba con `php artisan test --filter=OrdenEstadoTest`.
 
+#### Eliminación (`DELETE /ordenes/{orden}`)
+
+Solo se eliminan órdenes **pendientes**: una orden en proceso o finalizada ya es historial trabajado del vehículo. `OrdenServicioPolicy::delete()` lo decide y `destroy` llama a `Gate::authorize('delete', $orden)`. Por eso un `DELETE` sobre otra orden responde 403 con «Solo se pueden eliminar órdenes pendientes.».
+
+El botón **Eliminar** aparece en la ficha solo si la orden se puede borrar (`@can('delete', $orden)`). Sigue el contrato de marcado: formulario `POST` con `@csrf`, `@method('DELETE')`, `data-confirmar` y `onsubmit="return confirm(...)"`. Un `GET` a la misma URL solo muestra la ficha y nunca borra. Al eliminar, se vuelve al listado con «Orden #N eliminada correctamente.». Se comprueba con `php artisan test --filter=OrdenEliminacionTest`.
+
 
 
 

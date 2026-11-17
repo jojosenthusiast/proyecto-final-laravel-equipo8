@@ -93,4 +93,18 @@
 
         <a class="boton" href="{{ route('ordenes.index') }}">Volver al listado</a>
     </p>
+
+    {{-- [SEGURIDAD] Eliminar va por POST con @csrf y @method('DELETE'), nunca por un enlace GET.
+         data-confirmar lo usa biela.js; onsubmit pide la confirmación aunque el script no cargue. --}}
+    @auth
+        @can('delete', $orden)
+            <form method="POST" action="{{ route('ordenes.destroy', $orden) }}"
+                  data-confirmar="¿Eliminar la orden #{{ $orden->id }}?"
+                  onsubmit="return confirm(this.dataset.confirmar)">
+                @csrf
+                @method('DELETE')
+                <button class="boton boton-peligro">Eliminar</button>
+            </form>
+        @endcan
+    @endauth
 @endsection

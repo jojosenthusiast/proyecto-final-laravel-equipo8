@@ -145,9 +145,17 @@ class OrdenServicioController extends Controller
             ->with('exito', 'La orden pasó a '.CambiarEstadoOrdenRequest::NOMBRES[$orden->estado].'.');
     }
 
-    public function destroy(OrdenServicio $orden)
+    public function destroy(OrdenServicio $orden) // [CRUD-DELETE]
     {
-        abort(501, 'Pendiente: L8 (Leo)');
+        // [SEGURIDAD] La política solo permite borrar órdenes pendientes; el resto responde 403.
+        Gate::authorize('delete', $orden);
+
+        $numero = $orden->id;
+        $orden->delete();
+
+        return redirect()
+            ->route('ordenes.index')
+            ->with('exito', "Orden #{$numero} eliminada correctamente.");
     }
 
     /**
