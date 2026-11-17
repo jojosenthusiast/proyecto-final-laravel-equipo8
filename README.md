@@ -1052,6 +1052,9 @@ El listado es público y muestra las órdenes de 15 en 15, de la fecha de ingres
 - **Paginación:** `paginate(15)->withQueryString()` conserva los filtros en los enlaces de las demás páginas.
 - **Sin N+1:** `OrdenServicio::with(['vehiculo', 'tipoServicio'])` carga las dos relaciones en dos consultas. Como `preventLazyLoading` está activo fuera de producción, olvidar una relación haría fallar la página con `LazyLoadingViolationException`.
 - **Estado vacío:** sin órdenes aparece «No hay órdenes registradas.»; con filtros sin resultados, «No hay órdenes que coincidan con los filtros.» y el enlace **Quitar filtros**.
+- **Búsqueda por placa:** `placa` filtra con `whereHas('vehiculo', fn ($q) => $q->where('placa', 'like', '%'.$placa.'%'))`. El texto viaja como parámetro enlazado, así que comillas o comodines escritos a mano no alteran la consulta. Buscar «P0000» devuelve solo las órdenes de esas placas.
+- **Rango de fechas:** `desde` y `hasta` filtran por fecha de ingreso con el scope `delPeriodo()` de Carlos (C3). Se validan con `$request->validate()` y mensajes en español: una fecha inválida da «La fecha inicial no es una fecha válida.» y un rango invertido, «La fecha final no puede ser anterior a la fecha inicial.».
+- **Combinación:** placa, fechas, estado y tipo se combinan entre sí y se conservan al paginar.
 
 Se comprueba con `php artisan test --filter=OrdenListadoTest`.
 

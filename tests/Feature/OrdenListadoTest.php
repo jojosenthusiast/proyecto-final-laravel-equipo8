@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\OrdenServicio;
 use App\Models\TipoServicio;
+use App\Models\Vehiculo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -158,5 +159,109 @@ class OrdenListadoTest extends TestCase
     public function test_una_orden_inexistente_responde_404(): void
     {
         $this->get(route('ordenes.show', 999999))->assertNotFound();
+    }
+
+    public function test_busca_por_placa(): void
+    {
+        $uno = Vehiculo::factory()->create(['placa' => 'P000011']);
+        $dos = Vehiculo::factory()->create(['placa' => 'P000022']);
+        $otro = Vehiculo::factory()->create(['placa' => 'P123456']);
+        OrdenServicio::factory()->create(['vehiculo_id' => $uno->id]);
+        OrdenServicio::factory()->create(['vehiculo_id' => $dos->id]);
+        OrdenServicio::factory()->create(['vehiculo_id' => $otro->id]);
+
+        $this->get(route('ordenes.index', ['placa' => 'P0000']))
+            ->assertOk()
+            ->assertSee('P000011')
+            ->assertSee('P000022')
+            ->assertDontSee('P123456')
+            ->assertViewHas('ordenes', fn ($ordenes) => $ordenes->total() === 2);
+    }
+
+    public function test_la_placa_con_comodines_sql_no_rompe_la_busqueda(): void
+    {
+        OrdenServicio::factory()->create();
+
+        $this->get(route('ordenes.index', ['placa' => "%' OR 1--"]))
+            ->assertOk()
+            ->assertViewHas('ordenes', fn ($ordenes) => $ordenes->total() === 0);
+    }
+
+    public function test_filtra_por_rango_de_fechas_de_ingreso(): void
+    {
+        $dentro = OrdenServicio::factory()->create(['fecha_ingreso' => '2026-10-10']);
+        OrdenServicio::factory()->create(['fecha_ingreso' => '2026-09-01']);
+        OrdenServicio::factory()->create(['fecha_ingreso' => '2026-11-05']);
+
+        $this->get(route('ordenes.index', ['desde' => '2026-10-01', 'hasta' => '2026-10-31']))
+            ->assertOk()
+            ->assertViewHas('ordenes', function ($ordenes) use ($dentro) {
+                return $ordenes->total() === 1
+                    && $ordenes->getCollection()->first()->id === $dentro->id;
+            });
+    }
+
+    public function test_un_rango_sin_ordenes_muestra_el_estado_vacio(): void
+    {
+        OrdenServicio::factory()->create(['fecha_ingreso' => '2026-10-10']);
+
+        $this->get(route('ordenes.index', ['desde' => '2020-01-01', 'hasta' => '2020-01-31']))
+            ->assertOk()
+            ->assertSee('No hay órdenes que coincidan con los filtros.');
+    }
+
+    public function test_un_rango_invertido_da_error_en_espanol(): void
+    {
+        $this->from(route('ordenes.index'))
+            ->get(route('ordenes.index', ['desde' => '2026-10-31', 'hasta' => '2026-10-01']))
+            ->assertRedirect(route('ordenes.index'))
+            ->assertSessionHasErrors([
+                'hasta' => 'La fecha final no puede ser anterior a la fecha inicial.',
+            ]);
+    }
+
+    public function test_una_fecha_invalida_da_error_en_espanol(): void
+    {
+        $this->from(route('ordenes.index'))
+            ->get(route('ordenes.index', ['desde' => 'ayer']))
+            ->assertSessionHasErrors([
+                'desde' => 'La fecha inicial no es una fecha válida.',
+            ]);
+    }
+
+    public function test_la_busqueda_se_combina_con_estado_y_tipo_y_se_conserva_al_paginar(): void
+    {
+        $tipo = TipoServicio::factory()->create();
+        $vehiculo = Vehiculo::factory()->create(['placa' => 'P000099']);
+        OrdenServicio::factory()->count(16)->pendiente()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_servicio_id' => $tipo->id,
+            'fecha_ingreso' => '2026-10-15',
+        ]);
+        OrdenServicio::factory()->enProceso()->create([
+            'vehiculo_id' => $vehiculo->id,
+            'tipo_servicio_id' => $tipo->id,
+            'fecha_ingreso' => '2026-10-15',
+        ]);
+
+        $filtros = [
+            'placa' => 'P000099',
+            'estado' => 'pendiente',
+            'tipo' => $tipo->id,
+            'desde' => '2026-10-01',
+            'hasta' => '2026-10-31',
+        ];
+
+        $this->get(route('ordenes.index', $filtros))
+            ->assertOk()
+            ->assertViewHas('ordenes', function ($ordenes) {
+                $siguiente = $ordenes->url(2);
+
+                return $ordenes->total() === 16
+                    && str_contains($siguiente, 'placa=P000099')
+                    && str_contains($siguiente, 'estado=pendiente')
+                    && str_contains($siguiente, 'desde=2026-10-01')
+                    && str_contains($siguiente, 'hasta=2026-10-31');
+            });
     }
 }

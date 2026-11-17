@@ -17,10 +17,28 @@ use Illuminate\Support\Facades\Gate;
 class OrdenServicioController extends Controller
 {
     /**
-     * Lista las órdenes de servicio, paginadas y filtrables por estado y tipo de servicio.
+     * Lista las órdenes de servicio, paginadas y filtrables por estado, tipo de servicio, placa
+     * y rango de fechas de ingreso.
      */
     public function index(Request $request) // [CRUD-READ]
     {
+        // [VALIDACION] La búsqueda llega por GET; las fechas se validan antes de consultar.
+        $busqueda = $request->validate([
+            'placa' => ['nullable', 'string', 'max:10'],
+            'desde' => ['nullable', 'date'],
+            'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
+        ], [
+            'placa.string' => 'La placa debe ser texto.',
+            'placa.max' => 'La placa no puede tener más de 10 caracteres.',
+            'desde.date' => 'La fecha inicial no es una fecha válida.',
+            'hasta.date' => 'La fecha final no es una fecha válida.',
+            'hasta.after_or_equal' => 'La fecha final no puede ser anterior a la fecha inicial.',
+        ]);
+
+        $placa = trim($busqueda['placa'] ?? '') ?: null;
+        $desde = $busqueda['desde'] ?? null;
+        $hasta = $busqueda['hasta'] ?? null;
+
         // [SEGURIDAD] Solo se filtra por un estado que exista en el modelo; cualquier otro valor
         // se ignora en lugar de llegar a la consulta.
         $estado = $request->query('estado');
@@ -35,6 +53,12 @@ class OrdenServicioController extends Controller
         $ordenes = OrdenServicio::with(['vehiculo', 'tipoServicio'])
             ->when($estado, fn ($consulta, string $valor) => $consulta->estado($valor))
             ->when($tipo, fn ($consulta, int $valor) => $consulta->where('tipo_servicio_id', $valor))
+            // [SEGURIDAD] La placa viaja como parámetro enlazado del LIKE, nunca concatenada al SQL.
+            ->when($placa, fn ($consulta, string $valor) => $consulta->whereHas(
+                'vehiculo',
+                fn ($q) => $q->where('placa', 'like', '%'.$valor.'%')
+            ))
+            ->delPeriodo($desde, $hasta)
             ->latest('fecha_ingreso')
             ->latest('id')
             ->paginate(15)
@@ -42,7 +66,7 @@ class OrdenServicioController extends Controller
 
         $tiposServicio = TipoServicio::orderBy('nombre')->get(['id', 'nombre']);
 
-        return view('ordenes.index', compact('ordenes', 'tiposServicio', 'estado', 'tipo'));
+        return view('ordenes.index', compact('ordenes', 'tiposServicio', 'estado', 'tipo', 'placa', 'desde', 'hasta'));
     }
 
     /**

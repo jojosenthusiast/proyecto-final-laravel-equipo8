@@ -5,7 +5,7 @@
 @section('contenido')
     @php
         $nombresEstado = ['pendiente' => 'Pendiente', 'en_proceso' => 'En proceso', 'finalizada' => 'Finalizada'];
-        $filtrado = $estado !== null || $tipo !== null;
+        $filtrado = $estado !== null || $tipo !== null || $placa !== null || $desde !== null || $hasta !== null;
     @endphp
 
     <h1 class="titulo-pagina">Órdenes de servicio</h1>
@@ -16,6 +16,39 @@
     @endauth
 
     <form class="filtro" method="get" action="{{ route('ordenes.index') }}">
+        <div class="campo">
+            <label for="placa">Placa</label>
+            <input type="search" id="placa" name="placa" value="{{ $placa }}" placeholder="P000001" maxlength="10">
+        </div>
+
+        <div class="campo">
+            <label for="desde">Ingreso desde</label>
+            <input
+                type="date"
+                id="desde"
+                name="desde"
+                value="{{ $desde }}"
+                @error('desde') aria-invalid="true" aria-describedby="desde-error" @enderror
+            >
+            @error('desde')
+                <p class="error-campo" id="desde-error">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="campo">
+            <label for="hasta">Ingreso hasta</label>
+            <input
+                type="date"
+                id="hasta"
+                name="hasta"
+                value="{{ $hasta }}"
+                @error('hasta') aria-invalid="true" aria-describedby="hasta-error" @enderror
+            >
+            @error('hasta')
+                <p class="error-campo" id="hasta-error">{{ $message }}</p>
+            @enderror
+        </div>
+
         <div class="campo">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">
