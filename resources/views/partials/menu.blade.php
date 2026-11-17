@@ -1,4 +1,7 @@
-<nav aria-label="Navegación principal">
+<button class="boton boton-menu" type="button" aria-controls="menu-principal"
+    aria-expanded="false" hidden>Menú</button>
+
+<nav id="menu-principal" aria-label="Navegación principal">
     <a href="{{ route('inicio') }}" @if (request()->routeIs('inicio')) aria-current="page" @endif>Resumen</a>
     <a href="{{ route('vehiculos.index') }}"
         @if (request()->routeIs('vehiculos.*'))

@@ -462,3 +462,307 @@ a.page-link:hover {
         width: 100%;
     }
 }
+
+/* Componentes compartidos por los formularios de la Fase 2. */
+[hidden] {
+    display: none !important;
+}
+
+.contenedor > form:not(.filtro) {
+    max-width: 44rem;
+    padding: clamp(1rem, 3vw, 1.75rem);
+    border: 1px solid var(--biela-linea);
+    border-radius: var(--radio);
+    background: var(--biela-superficie);
+}
+
+.campo {
+    display: grid;
+    min-width: 0;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.campo label {
+    font-weight: 650;
+}
+
+.campo :is(input:not([type="checkbox"], [type="radio"], [type="hidden"]), select, textarea),
+.filtro > input:not([type="hidden"]) {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--biela-suave);
+    border-radius: var(--radio);
+    background: var(--biela-superficie);
+    color: var(--biela-tinta);
+    font: inherit;
+}
+
+.campo textarea {
+    min-height: 6rem;
+    resize: vertical;
+}
+
+.campo [aria-invalid="true"] {
+    border-color: var(--biela-acento);
+    outline: 1px solid var(--biela-acento);
+}
+
+.error-campo, .aviso-imagen-error {
+    color: var(--biela-acento);
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.filtro .campo {
+    margin-bottom: 0;
+}
+
+.filtro:has(.campo) {
+    align-items: end;
+}
+
+.filtro select, .filtro > input:not([type="hidden"]) {
+    width: auto;
+    max-width: 100%;
+}
+
+.orden-tabla-movil {
+    display: none;
+}
+
+.resumen-errores {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--biela-acento);
+    border-radius: var(--radio);
+    background: var(--biela-superficie);
+}
+
+.resumen-errores h2 {
+    font-size: 1.2rem;
+}
+
+.resumen-errores ul {
+    margin-bottom: 0;
+    padding-inline-start: 1.25rem;
+}
+
+.alerta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cerrar-alerta {
+    padding: 0.3rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#confirmar-eliminacion {
+    width: min(28rem, calc(100% - 2rem));
+    max-height: calc(100% - 2rem);
+    padding: 1.5rem;
+    border: 1px solid var(--biela-linea);
+    border-radius: var(--radio);
+    background: var(--biela-superficie);
+    color: var(--biela-tinta);
+}
+
+#confirmar-eliminacion::backdrop {
+    background: color-mix(in srgb, var(--biela-tinta) 65%, transparent);
+}
+
+#mensaje-confirmacion {
+    margin-block: 0.85rem 1.25rem;
+    overflow-wrap: anywhere;
+}
+
+.acciones-dialogo, .acciones-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.boton-secundario {
+    border-color: var(--biela-suave);
+    background: var(--biela-superficie);
+    color: var(--biela-tinta);
+}
+
+.boton-secundario:hover {
+    background: var(--biela-fondo);
+}
+
+.boton-peligro {
+    border-color: var(--biela-acento);
+}
+
+.campo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radio);
+}
+
+.aviso-imagen {
+    font-size: 0.875rem;
+}
+
+body > header nav {
+    align-items: center;
+}
+
+body > header nav > span {
+    padding-inline: 0.5rem;
+    color: var(--biela-fondo);
+    overflow-wrap: anywhere;
+}
+
+.taller-estados {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.taller-estados p {
+    margin-bottom: 0.3rem;
+}
+
+.taller-estados progress {
+    display: block;
+    width: 100%;
+    height: 0.65rem;
+    accent-color: var(--biela-acento);
+}
+
+.orden-antigua {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--biela-linea);
+    border-radius: var(--radio);
+    background: var(--biela-superficie);
+}
+
+@media (max-width: 639px) {
+    body > header {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    body > header nav {
+        flex: 1 0 100%;
+        align-items: stretch;
+    }
+
+    body > header nav > span {
+        padding-inline: 0;
+    }
+
+    .boton, .cerrar-alerta {
+        min-height: 44px;
+    }
+
+    .filtro > :is(.campo, select), .filtro > input:not([type="hidden"]) {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .taller-estados {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tabla {
+        border: 0;
+        background: transparent;
+    }
+
+    .orden-tabla-movil {
+        display: block;
+        padding: 0.65rem 0.85rem;
+        border: 1px solid var(--biela-linea);
+        border-radius: var(--radio);
+        background: var(--biela-superficie);
+    }
+
+    .orden-tabla-movil ul {
+        margin-block-end: 0;
+        padding-inline-start: 1.25rem;
+    }
+
+    .orden-tabla-movil a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .tabla thead:not(:has(a)), .tabla[data-orden-movil] thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .tabla[data-orden-movil] thead a {
+        visibility: hidden;
+    }
+
+    .tabla :is(tbody, tfoot) {
+        display: grid;
+        gap: 0.65rem;
+    }
+
+    .tabla tfoot {
+        margin-top: 0.65rem;
+    }
+
+    .tabla :is(tbody, tfoot) tr {
+        display: block;
+        border: 1px solid var(--biela-linea);
+        border-radius: var(--radio);
+        background: var(--biela-superficie);
+    }
+
+    .tabla tbody tr:nth-child(even) {
+        background: var(--biela-superficie);
+    }
+
+    .tabla :is(tbody, tfoot) :is(th, td) {
+        display: block;
+        width: auto;
+        overflow-wrap: anywhere;
+    }
+
+    .tabla tbody td[data-label]::before {
+        display: block;
+        margin-block-end: 0.2rem;
+        color: var(--biela-suave);
+        font-size: 0.8rem;
+        font-weight: 650;
+        content: attr(data-label);
+    }
+
+    .tabla tbody tr + tr td {
+        border-block-start: 0;
+    }
+
+    .tabla tbody td + td {
+        border-block-start: 1px solid var(--biela-linea);
+    }
+}
+
+.indicadores-panel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 639px) {
+    .indicadores-panel {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

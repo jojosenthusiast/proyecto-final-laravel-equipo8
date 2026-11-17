@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('titulo', 'Resumen')
@@ -6,139 +5,95 @@
 @section('contenido')
     <h1 class="titulo-pagina">Resumen del taller</h1>
 
-    <p>
-        Consulta los vehículos registrados y las órdenes
-        de servicio del taller.
-    </p>
+    <div class="acciones-panel">
+        @auth
+            @if (Route::has('vehiculos.create'))
+                <a class="boton" href="{{ route('vehiculos.create') }}">Registrar vehículo</a>
+            @endif
 
-    <div class="indicadores">
+            @if (Route::has('ordenes.create'))
+                <a class="boton" href="{{ route('ordenes.create') }}">Registrar orden</a>
+            @endif
+        @endauth
 
-        <div class="indicador">
-            <div class="indicador-valor">
-                {{ $totalVehiculos }}
-            </div>
-            <div class="indicador-nombre">
-                Vehículos registrados
-            </div>
-        </div>
-
-        <div class="indicador">
-            <div class="indicador-valor">
-                {{ $totalOrdenes }}
-            </div>
-            <div class="indicador-nombre">
-                Órdenes de servicio
-            </div>
-        </div>
-
-        <div class="indicador">
-            <div class="indicador-valor">
-                {{ $ordenesPorEstado['pendiente'] }}
-            </div>
-            <div class="indicador-nombre">
-                Pendientes
-            </div>
-        </div>
-
-        <div class="indicador">
-            <div class="indicador-valor">
-                {{ $ordenesPorEstado['en_proceso'] }}
-            </div>
-            <div class="indicador-nombre">
-                En proceso
-            </div>
-        </div>
-
-        <div class="indicador">
-            <div class="indicador-valor">
-                {{ $ordenesPorEstado['finalizada'] }}
-            </div>
-            <div class="indicador-nombre">
-                Finalizadas
-            </div>
-        </div>
-
+        @if (Route::has('reportes.index'))
+            <a class="boton boton-secundario" href="{{ route('reportes.index') }}">Ver reporte</a>
+        @endif
     </div>
 
-    {{-- Servicios más solicitados --}}
+    <div class="indicadores indicadores-panel">
+        <div class="indicador">
+            <span class="indicador-valor">{{ $totalVehiculos }}</span>
+            <span class="indicador-nombre">Vehículos registrados</span>
+        </div>
+        <div class="indicador">
+            <span class="indicador-valor">{{ $totalOrdenes }}</span>
+            <span class="indicador-nombre">Órdenes de servicio</span>
+        </div>
+        <div class="indicador">
+            <span class="indicador-valor">${{ number_format($ingresosMes, 2) }}</span>
+            <span class="indicador-nombre">Ingresos del mes</span>
+        </div>
+    </div>
+
+    <h2>Órdenes por estado</h2>
+
+    <div class="taller-estados">
+        @foreach (['pendiente' => 'Pendientes', 'en_proceso' => 'En proceso', 'finalizada' => 'Finalizadas'] as $estado => $nombre)
+            <div class="indicador">
+                <p><strong>{{ $ordenesPorEstado[$estado] }}</strong> {{ $nombre }} · {{ $porcentajes[$estado] }} %</p>
+                <progress aria-label="{{ $nombre }}" max="100" value="{{ $porcentajes[$estado] }}"></progress>
+            </div>
+        @endforeach
+    </div>
+
+    @if ($ordenAntigua)
+        <p class="orden-antigua">
+            <strong>Orden abierta más antigua</strong>
+            <a href="{{ route('ordenes.show', $ordenAntigua) }}">#{{ $ordenAntigua->id }} · {{ $ordenAntigua->vehiculo->placa }}</a>
+            · Ingreso {{ $ordenAntigua->fecha_ingreso->format('d/m/Y') }}
+        </p>
+    @else
+        <p class="vacio">No hay órdenes abiertas.</p>
+    @endif
+
     <h2>Servicios más solicitados</h2>
 
     @if ($tiposServicio->isEmpty())
-        <p class="vacio">
-            El catálogo de servicios está vacío.
-        </p>
+        <p class="vacio">El catálogo de servicios está vacío.</p>
     @else
         <table class="tabla">
-            <thead>
-                <tr>
-                    <th>Servicio</th>
-                    <th>Órdenes</th>
-                </tr>
-            </thead>
-
+            <thead><tr><th scope="col">Servicio</th><th scope="col">Órdenes</th></tr></thead>
             <tbody>
                 @foreach ($tiposServicio as $tipo)
                     <tr>
-                        <td>{{ $tipo->nombre }}</td>
-                        <td>{{ $tipo->ordenes_count }}</td>
+                        <td data-label="Servicio">{{ $tipo->nombre }}</td>
+                        <td data-label="Órdenes">{{ $tipo->ordenes_count }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     @endif
 
-
-    {{-- Últimas órdenes registradas en el taller --}}
     <h2>Últimas órdenes</h2>
 
     @if ($ultimasOrdenes->isEmpty())
-        <p class="vacio">
-            Todavía no hay órdenes de servicio registradas.
-        </p>
+        <p class="vacio">Todavía no hay órdenes de servicio registradas.</p>
     @else
         <table class="tabla">
-            <thead>
-                <tr>
-                    <th>Placa</th>
-                    <th>Servicio</th>
-                    <th>Ingreso</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-
+            <thead><tr><th scope="col">Placa</th><th scope="col">Servicio</th><th scope="col">Ingreso</th><th scope="col">Estado</th></tr></thead>
             <tbody>
                 @foreach ($ultimasOrdenes as $orden)
                     <tr>
-                        <td>
-                            <a href="{{ url('/vehiculos/' . $orden->vehiculo_id) }}">
-                                <span class="placa">
-                                    {{ $orden->vehiculo->placa }}
-                                </span>
-                            </a>
+                        <td data-label="Placa">
+                            <a href="{{ route('vehiculos.show', $orden->vehiculo_id) }}"><span class="placa">{{ $orden->placa }}</span></a>
                         </td>
-
-                        <td>
-                            {{ $orden->tipoServicio->nombre }}
-                        </td>
-
-                        <td>
-                            {{ $orden->fecha_ingreso->format('d/m/Y') }}
-                        </td>
-
-                        <td>
-                            @if ($orden->estado === 'pendiente')
-                                <span class="etiqueta etiqueta-pendiente">
-                                    Pendiente
-                                </span>
-                            @elseif ($orden->estado === 'en_proceso')
-                                <span class="etiqueta etiqueta-en-proceso">
-                                    En proceso
-                                </span>
-                            @else
-                                <span class="etiqueta etiqueta-finalizada">
-                                    Finalizada
-                                </span>
-                            @endif
+                        <td data-label="Servicio">{{ $orden->servicio }}</td>
+                        <td data-label="Ingreso">{{ \Illuminate\Support\Carbon::parse($orden->fecha_ingreso)->format('d/m/Y') }}</td>
+                        <td data-label="Estado">
+                            <span class="etiqueta etiqueta-{{ str_replace('_', '-', $orden->estado) }}">
+                                {{ ['pendiente' => 'Pendiente', 'en_proceso' => 'En proceso', 'finalizada' => 'Finalizada'][$orden->estado] }}
+                            </span>
                         </td>
                     </tr>
                 @endforeach
@@ -146,8 +101,5 @@
         </table>
     @endif
 
-
-    <a class="boton" href="{{ url('/vehiculos') }}">
-        Ver vehículos
-    </a>
+    <a class="boton" href="{{ route('vehiculos.index') }}">Ver vehículos</a>
 @endsection

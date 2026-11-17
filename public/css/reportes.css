@@ -1,0 +1,89 @@
+.reporte > * + *, .reporte section > * + * {
+    margin-block-start: 1rem;
+}
+
+.reporte > section + section {
+    margin-block-start: 2rem;
+}
+
+.acciones-reporte {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.barra-ingresos {
+    display: block;
+    width: 100%;
+    height: 0.65rem;
+    accent-color: var(--biela-acento);
+    margin-block-start: 0.3rem;
+    min-width: 4rem;
+}
+
+.dias-taller-demora {
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radio);
+    background: var(--estado-pendiente-fondo);
+    color: var(--estado-pendiente);
+    font-weight: 750;
+}
+
+@media print {
+    @page {
+        margin: 15mm;
+    }
+
+    body {
+        display: block;
+        background: white;
+        color: black;
+    }
+
+    body > header, body > footer, .filtro, .acciones-reporte, .alerta, .resumen-errores, .barra-ingresos {
+        display: none !important;
+    }
+
+    .contenedor {
+        width: 100%;
+        padding: 0;
+    }
+
+    .reporte > section + section {
+        break-before: page;
+        margin-block-start: 0;
+    }
+
+    .reporte .tabla {
+        display: table;
+        overflow: visible;
+        background: white;
+    }
+
+    .reporte .tabla thead {
+        display: table-header-group;
+        position: static;
+        width: auto;
+        height: auto;
+        clip-path: none;
+    }
+
+    .reporte .tabla tbody { display: table-row-group; }
+    .reporte .tabla tfoot { display: table-footer-group; }
+    .reporte .tabla tr { display: table-row; break-inside: avoid; }
+
+    .reporte .tabla :is(th, td) {
+        display: table-cell;
+        color: black;
+        background: white;
+    }
+
+    .reporte .tabla td::before {
+        content: none;
+    }
+
+    .reporte :is(.placa, .etiqueta, .dias-taller-demora) {
+        color: black;
+        background: white;
+    }
+}
