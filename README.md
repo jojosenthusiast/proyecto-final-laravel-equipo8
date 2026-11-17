@@ -1087,6 +1087,12 @@ Registrar requiere sesión. El formulario tiene listas desplegables de vehículo
 
 El total nunca llega del formulario: aunque alguien envíe `costo_total=1` a mano, `validated()` lo descarta y se guarda precio base + adicional. Todo corre en el backend de Laravel de la propia aplicación, sin servicios externos. Se comprueba con `php artisan test --filter=OrdenCostoTest`.
 
+#### Regla 3 y transacción al registrar
+
+**Regla 3:** el kilometraje de ingreso no puede ser menor que el último registrado del vehículo. `StoreOrdenServicioRequest` agrega a `kilometraje_ingreso` la regla de Fernando, `new KilometrajeNoMenorAlUltimo($vehiculoId)`, que compara contra `Vehiculo::ultimoKilometraje()`: el mayor entre el kilometraje del vehículo y el de sus órdenes. Por ejemplo, P000002 tiene una orden con 85 000 km, así que una orden nueva con 80 000 muestra «El kilometraje no puede ser menor que el último registrado (85000 km).». Si `vehiculo_id` no es un número, la regla recibe `null` y el error lo da `integer`, sin llegar a un 500.
+
+**Transacción:** `store` envuelve en `DB::transaction()` la creación de la orden, el cálculo del costo y la actualización del vehículo. Si el kilometraje de ingreso supera el del vehículo, el vehículo queda con el nuevo valor. Si cualquier paso lanza una excepción, Laravel revierte todo: no queda una orden guardada con el vehículo sin actualizar, ni al revés. Se comprueba con `php artisan test --filter=OrdenTransaccionTest`, que simula un fallo al actualizar el vehículo.
+
 
 
 

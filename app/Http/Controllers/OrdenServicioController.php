@@ -7,6 +7,7 @@ use App\Models\OrdenServicio;
 use App\Models\TipoServicio;
 use App\Models\Vehiculo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 // Esqueleto fijado en C6: las firmas son contrato. Leo reemplaza cada abort(501) en su commit
 // y puede cambiar Request por su Form Request sin cambiar el nombre del método ni del parámetro.
@@ -69,14 +70,26 @@ class OrdenServicioController extends Controller
         // [SEGURIDAD] Solo los campos validados; costo_total y estado no vienen del formulario.
         $datos = $request->validated();
 
-        $orden = new OrdenServicio($datos);
-        $orden->estado = 'pendiente';
-        $orden->costo_adicional = $datos['costo_adicional'] ?? 0;
+        // [REGLA-NEGOCIO] La orden y el kilometraje del vehículo se guardan juntos o no se guarda
+        // ninguno: si falla la actualización del vehículo, DB::transaction revierte la orden y el
+        // vehículo nunca queda con un kilometraje distinto al de su última orden.
+        $orden = DB::transaction(function () use ($datos) {
+            $orden = new OrdenServicio($datos);
+            $orden->estado = 'pendiente';
+            $orden->costo_adicional = $datos['costo_adicional'] ?? 0;
 
-        // [REGLA-NEGOCIO] El total lo calcula el modelo: precio base del servicio + costo adicional.
-        $orden->calcularCostoTotal();
+            // [REGLA-NEGOCIO] El total lo calcula el modelo: precio base del servicio + costo adicional.
+            $orden->calcularCostoTotal();
+            $orden->save();
 
-        $orden->save();
+            $vehiculo = Vehiculo::findOrFail($orden->vehiculo_id);
+
+            if ($orden->kilometraje_ingreso > $vehiculo->kilometraje) {
+                $vehiculo->update(['kilometraje' => $orden->kilometraje_ingreso]);
+            }
+
+            return $orden;
+        });
 
         return redirect()
             ->route('ordenes.show', $orden)

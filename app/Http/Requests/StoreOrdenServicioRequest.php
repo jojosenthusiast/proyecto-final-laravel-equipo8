@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\KilometrajeNoMenorAlUltimo;
 use Illuminate\Foundation\Http\FormRequest;
 
 // [VALIDACION] Registro de una orden de servicio. costo_total y estado NO están en las reglas:
@@ -16,7 +17,22 @@ class StoreOrdenServicioRequest extends FormRequest
 
     public function rules(): array
     {
-        return self::reglas();
+        $reglas = self::reglas();
+
+        // [REGLA-NEGOCIO] Regla 3: el kilometraje de ingreso no baja del último registrado.
+        $reglas['kilometraje_ingreso'][] = new KilometrajeNoMenorAlUltimo($this->vehiculoId());
+
+        return $reglas;
+    }
+
+    /**
+     * Vehículo enviado como entero, o null si no es numérico (ese error lo da 'integer').
+     */
+    protected function vehiculoId(): ?int
+    {
+        $id = filter_var($this->input('vehiculo_id'), FILTER_VALIDATE_INT);
+
+        return $id === false ? null : $id;
     }
 
     /**
