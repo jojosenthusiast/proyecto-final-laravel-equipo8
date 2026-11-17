@@ -1042,7 +1042,18 @@ Las fotos JPG y WEBP de la prueba son imágenes reales de 1×1 px escritas en by
 
 ### Órdenes (Leo)
 
-*Pendiente: Leo documenta aquí el módulo de órdenes y las reglas 3, 4 y 5.*
+Módulo de la entidad relacionada: `OrdenServicioController` con sus Form Requests, la política de la regla 5 y las vistas de `resources/views/ordenes`.
+
+#### Listado de órdenes (`/ordenes`)
+
+El listado es público y muestra las órdenes de 15 en 15, de la fecha de ingreso más reciente a la más antigua. Cada fila trae el número, la placa con la marca y el modelo del vehículo, el tipo de servicio, las fechas de ingreso y de entrega (o **Sin entregar**), el estado con su etiqueta de color y el costo total, más el botón **Ver orden**.
+
+- **Filtros:** `estado` y `tipo` viajan por GET y se combinan. El estado solo se usa si está en `OrdenServicio::ESTADOS`; cualquier otro valor se ignora en lugar de llegar a la consulta. El tipo solo se acepta como entero positivo.
+- **Paginación:** `paginate(15)->withQueryString()` conserva los filtros en los enlaces de las demás páginas.
+- **Sin N+1:** `OrdenServicio::with(['vehiculo', 'tipoServicio'])` carga las dos relaciones en dos consultas. Como `preventLazyLoading` está activo fuera de producción, olvidar una relación haría fallar la página con `LazyLoadingViolationException`.
+- **Estado vacío:** sin órdenes aparece «No hay órdenes registradas.»; con filtros sin resultados, «No hay órdenes que coincidan con los filtros.» y el enlace **Quitar filtros**.
+
+Se comprueba con `php artisan test --filter=OrdenListadoTest`.
 
 
 
