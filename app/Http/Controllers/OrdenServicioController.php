@@ -39,9 +39,15 @@ class OrdenServicioController extends Controller
         return view('ordenes.index', compact('ordenes', 'tiposServicio', 'estado', 'tipo'));
     }
 
-    public function show(OrdenServicio $orden)
+    /**
+     * Muestra una orden con su vehículo, su servicio y el desglose del costo.
+     */
+    public function show(OrdenServicio $orden) // [CRUD-READ] [INYECCION-DEPENDENCIAS]
     {
-        abort(501, 'Pendiente: L2 (Leo)');
+        // Route model binding: Laravel busca la orden por {orden} y responde 404 si no existe.
+        $orden->load(['vehiculo', 'tipoServicio']);
+
+        return view('ordenes.show', compact('orden'));
     }
 
     // Acepta ?vehiculo=ID para preseleccionar el vehículo desde su ficha.

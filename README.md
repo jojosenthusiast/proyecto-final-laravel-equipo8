@@ -1055,6 +1055,12 @@ El listado es público y muestra las órdenes de 15 en 15, de la fecha de ingres
 
 Se comprueba con `php artisan test --filter=OrdenListadoTest`.
 
+#### Ficha de la orden (`/ordenes/{orden}`)
+
+`show(OrdenServicio $orden)` recibe la orden por route model binding (el parámetro se llama `orden`, no `ordene`): si no existe, Laravel responde 404 antes de entrar al método. Después carga el vehículo y el servicio con `$orden->load(['vehiculo', 'tipoServicio'])`.
+
+La ficha muestra el estado, el vehículo (con enlace a su ficha), el servicio (con enlace a la ficha del servicio), las fechas de ingreso y entrega, el kilometraje de ingreso y la descripción. Debajo va el **desglose del costo**: precio base del servicio, costo adicional y costo total. Se comprueba con `php artisan test --filter=OrdenListadoTest`.
+
 
 
 

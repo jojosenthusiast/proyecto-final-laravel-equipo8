@@ -119,4 +119,44 @@ class OrdenListadoTest extends TestCase
             ->assertOk()
             ->assertSee('No hay órdenes que coincidan con los filtros.');
     }
+
+    public function test_la_ficha_muestra_los_datos_y_el_desglose_del_costo(): void
+    {
+        $tipo = TipoServicio::factory()->create(['nombre' => 'Frenos', 'precio_base' => 40]);
+        $orden = OrdenServicio::factory()->finalizada()->create([
+            'tipo_servicio_id' => $tipo->id,
+            'costo_adicional' => 12.5,
+            'kilometraje_ingreso' => 85000,
+            'descripcion' => 'Cambio de pastillas delanteras',
+        ]);
+        $orden->load('vehiculo');
+
+        $this->get(route('ordenes.show', $orden))
+            ->assertOk()
+            ->assertViewIs('ordenes.show')
+            ->assertSee($orden->vehiculo->placa)
+            ->assertSee('Frenos')
+            ->assertSee('Cambio de pastillas delanteras')
+            ->assertSee('85,000 km')
+            ->assertSee($orden->fecha_ingreso->format('d/m/Y'))
+            ->assertSee($orden->fecha_entrega->format('d/m/Y'))
+            ->assertSee('etiqueta etiqueta-finalizada', false)
+            ->assertSeeInOrder(['Precio base', '$40.00', 'Costo adicional', '$12.50', 'Costo total', '$52.50'])
+            ->assertSee(route('vehiculos.show', $orden->vehiculo), false)
+            ->assertSee(route('servicios.show', $tipo), false);
+    }
+
+    public function test_la_ficha_sin_entrega_lo_indica(): void
+    {
+        $orden = OrdenServicio::factory()->pendiente()->create(['fecha_entrega' => null]);
+
+        $this->get(route('ordenes.show', $orden))
+            ->assertOk()
+            ->assertSee('Sin entregar');
+    }
+
+    public function test_una_orden_inexistente_responde_404(): void
+    {
+        $this->get(route('ordenes.show', 999999))->assertNotFound();
+    }
 }
